@@ -92,7 +92,10 @@
           <img :src="previewImg" class="preview-img" />
         </div>
         <div class="preview-actions">
-          <van-button type="danger" round block @click="copyImage">
+          <van-button type="danger" round block icon="share-o" @click="shareOrSaveImage">
+            保存 / 分享图片
+          </van-button>
+          <van-button plain round block style="margin-top: 10px" icon="description" @click="copyImage">
             复制图片
           </van-button>
           <van-button plain round block style="margin-top: 10px" @click="showPreview = false">
@@ -285,6 +288,33 @@ export default {
       } catch (e) {
         Toast({
           message: '当前浏览器不支持直接复制，请长按上方图片保存或复制',
+          duration: 2500
+        })
+      }
+    },
+    async shareOrSaveImage() {
+      try {
+        const blob = await (await fetch(this.previewImg)).blob()
+        const file = new File([blob], '采购清单.png', { type: blob.type })
+        // 优先系统分享（移动端可直接分享到微信/保存相册）
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: '今日午餐采购清单' })
+          return
+        }
+        // 降级为下载
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = '采购清单.png'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        Toast.success('图片已开始下载')
+      } catch (e) {
+        if (e && e.name === 'AbortError') return // 用户取消分享
+        Toast({
+          message: '保存失败，请长按上方图片保存到相册',
           duration: 2500
         })
       }
