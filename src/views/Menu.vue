@@ -2,7 +2,12 @@
   <div class="menu-page">
     <!-- 顶部搜索头部 -->
     <div class="search-header">
-      <div class="search-header-title">今日午餐</div>
+      <div class="search-header-title">
+        <span>今日午餐</span>
+        <span class="home-entry" @click="goHome">
+          <van-icon name="wap-home-o" /> 首页
+        </span>
+      </div>
       <van-search
         v-model="keyword"
         placeholder="搜索菜品名称"
@@ -87,7 +92,7 @@
 </template>
 
 <script>
-import { Search, Tabs, Tab, Tag, Button, Toast } from 'vant'
+import { Search, Tabs, Tab, Tag, Button, Toast, Icon } from 'vant'
 import { dishes, categoryList } from '../data/dishes'
 import EmptyState from '../components/EmptyState.vue'
 
@@ -99,6 +104,7 @@ export default {
     [Tab.name]: Tab,
     [Tag.name]: Tag,
     [Button.name]: Button,
+    [Icon.name]: Icon,
     EmptyState
   },
   data() {
@@ -141,6 +147,9 @@ export default {
     onImgError(e) {
       e.target.src = '/img/default-food.svg'
     },
+    goHome() {
+      this.$router.push('/start')
+    },
     onSearch() {
       // 搜索已通过 computed 实时过滤
     },
@@ -170,11 +179,31 @@ export default {
   box-shadow: 0 4px 16px rgba(255, 96, 52, 0.2);
 }
 .search-header-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 18px;
   font-weight: 700;
   color: #fff;
   margin-bottom: 8px;
   letter-spacing: 1px;
+}
+.home-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 4px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.home-entry:active {
+  transform: scale(0.93);
+  background: rgba(255, 255, 255, 0.35);
 }
 
 /* 搜索框深度样式 */
