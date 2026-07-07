@@ -1,9 +1,9 @@
 <template>
   <div class="mine-page">
-    <!-- 历史采购清单 -->
+    <!-- 历史菜单 -->
     <div class="section">
       <div class="section-header">
-        <h3 class="section-title-inline">历史采购清单</h3>
+        <h3 class="section-title-inline">历史菜单</h3>
         <span
           v-if="historyList.length"
           class="clear-all-btn"

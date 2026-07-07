@@ -70,7 +70,7 @@
           icon="orders-o"
           @click="generateList"
         >
-          生成清单 · 分享给会做饭的 TA
+          生成今日菜单 · 分享给会做饭的 TA
         </van-button>
       </div>
     </template>
