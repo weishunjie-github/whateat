@@ -181,13 +181,18 @@ export default {
       const ctx = canvas.getContext('2d')
       const dpr = window.devicePixelRatio || 1
       const W = 375
-      const lineH = 32
-      const padding = 24
-      const headerH = 80
-      const footerH = 40
+      const margin = 16
+      const cardX = margin
+      const cardW = W - margin * 2
+      const headerH = 96
+      const rowH = 44
+      const listTop = margin + headerH + 6
+      const listH = this.cartList.length * rowH
+      const totalBarH = 46
       const hasMsg = this.customMessage.trim().length > 0
-      const msgH = hasMsg ? 56 : 0
-      const H = headerH + this.cartList.length * lineH + msgH + footerH + 20
+      const msgH = hasMsg ? 64 : 0
+      const footerH = 54
+      const H = listTop + listH + totalBarH + msgH + footerH + margin
 
       canvas.width = W * dpr
       canvas.height = H * dpr
@@ -195,80 +200,140 @@ export default {
       canvas.style.height = H + 'px'
       ctx.scale(dpr, dpr)
 
-      // 白底
-      ctx.fillStyle = '#fff'
+      // 圆角矩形辅助函数
+      const rr = (x, y, w, h, r) => {
+        ctx.beginPath()
+        ctx.moveTo(x + r, y)
+        ctx.arcTo(x + w, y, x + w, y + h, r)
+        ctx.arcTo(x + w, y + h, x, y + h, r)
+        ctx.arcTo(x, y + h, x, y, r)
+        ctx.arcTo(x, y, x + w, y, r)
+        ctx.closePath()
+      }
+
+      const now = new Date()
+      const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`
+      const totalCount = this.cartList.reduce((s, i) => s + i.num, 0)
+
+      // 背景渐变
+      const bg = ctx.createLinearGradient(0, 0, 0, H)
+      bg.addColorStop(0, '#fff3ec')
+      bg.addColorStop(1, '#ffe9df')
+      ctx.fillStyle = bg
       ctx.fillRect(0, 0, W, H)
 
-      // 顶部橙色条
-      ctx.fillStyle = '#ff6034'
-      ctx.fillRect(0, 0, W, 6)
+      // 主卡片（白底圆角 + 阴影）
+      rr(cardX, margin, cardW, H - margin * 2, 18)
+      ctx.save()
+      ctx.shadowColor = 'rgba(255,96,52,0.18)'
+      ctx.shadowBlur = 20
+      ctx.shadowOffsetY = 6
+      ctx.fillStyle = '#ffffff'
+      ctx.fill()
+      ctx.restore()
+
+      // 头部橙色渐变（裁剪为卡片上圆角）
+      ctx.save()
+      rr(cardX, margin, cardW, H - margin * 2, 18)
+      ctx.clip()
+      const hg = ctx.createLinearGradient(cardX, margin, cardX + cardW, margin + headerH)
+      hg.addColorStop(0, '#ff6a3d')
+      hg.addColorStop(1, '#ff9a52')
+      ctx.fillStyle = hg
+      ctx.fillRect(cardX, margin, cardW, headerH)
+      ctx.restore()
 
       // 标题
-      ctx.fillStyle = '#333'
+      ctx.fillStyle = '#ffffff'
       ctx.font = 'bold 20px sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillText('今日午餐采购清单', W / 2, 46)
+      ctx.fillText('🍱 今日午餐采购清单', W / 2, margin + 42)
+      // 副标题
+      ctx.font = '12px sans-serif'
+      ctx.fillStyle = 'rgba(255,255,255,0.92)'
+      ctx.fillText(`${dateStr}  ·  共 ${this.cartList.length} 样 ${totalCount} 份`, W / 2, margin + 70)
 
-      // 分割线
+      // 菜品列表
+      this.cartList.forEach((item, idx) => {
+        const y = listTop + idx * rowH
+        const cy = y + rowH / 2
+        // 交替行背景
+        if (idx % 2 === 1) {
+          ctx.fillStyle = '#fafafa'
+          ctx.fillRect(cardX + 1, y, cardW - 2, rowH)
+        }
+        // 序号圆点
+        ctx.beginPath()
+        ctx.arc(cardX + 28, cy, 11, 0, Math.PI * 2)
+        ctx.fillStyle = '#ff6a3d'
+        ctx.fill()
+        ctx.fillStyle = '#fff'
+        ctx.font = 'bold 12px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(String(idx + 1), cardX + 28, cy + 1)
+        // 菜名
+        ctx.textAlign = 'left'
+        ctx.fillStyle = '#333'
+        ctx.font = '15px sans-serif'
+        ctx.fillText(item.name, cardX + 48, cy)
+        // 数量胶囊标签
+        const qtyText = '× ' + item.num
+        ctx.font = 'bold 13px sans-serif'
+        const tw = ctx.measureText(qtyText).width
+        const pillW = tw + 20
+        const pillH = 22
+        const pillX = cardX + cardW - 16 - pillW
+        const pillY = cy - pillH / 2
+        rr(pillX, pillY, pillW, pillH, 11)
+        ctx.fillStyle = '#fff0eb'
+        ctx.fill()
+        ctx.fillStyle = '#ff6a3d'
+        ctx.textAlign = 'center'
+        ctx.fillText(qtyText, pillX + pillW / 2, cy)
+        ctx.textBaseline = 'alphabetic'
+      })
+
+      // 合计条
+      const totalY = listTop + listH
       ctx.strokeStyle = '#f0f0f0'
       ctx.lineWidth = 1
       ctx.beginPath()
-      ctx.moveTo(padding, 62)
-      ctx.lineTo(W - padding, 62)
+      ctx.moveTo(cardX + 16, totalY + 2)
+      ctx.lineTo(cardX + cardW - 16, totalY + 2)
       ctx.stroke()
-
-      // 菜品列表
-      ctx.font = '15px sans-serif'
+      ctx.font = '14px sans-serif'
+      ctx.fillStyle = '#999'
       ctx.textAlign = 'left'
-      this.cartList.forEach((item, idx) => {
-        const y = headerH + idx * lineH + 20
-        ctx.fillStyle = '#333'
-        ctx.fillText(`${item.name}`, padding, y)
-        ctx.textAlign = 'right'
-        ctx.fillStyle = '#ff6034'
-        ctx.fillText(`× ${item.num}`, W - padding, y)
-        ctx.textAlign = 'left'
-        // 虚线
-        if (idx < this.cartList.length - 1) {
-          ctx.strokeStyle = '#f5f5f5'
-          ctx.beginPath()
-          ctx.setLineDash([3, 3])
-          ctx.moveTo(padding, y + 12)
-          ctx.lineTo(W - padding, y + 12)
-          ctx.stroke()
-          ctx.setLineDash([])
-        }
-      })
+      ctx.fillText('合计', cardX + 20, totalY + 30)
+      ctx.font = 'bold 15px sans-serif'
+      ctx.fillStyle = '#ff6a3d'
+      ctx.textAlign = 'right'
+      ctx.fillText(`${this.cartList.length} 样  ·  ${totalCount} 份`, cardX + cardW - 20, totalY + 30)
 
-      // 祖福语
+      // 祝福语
       if (hasMsg) {
-        const msgY = headerH + this.cartList.length * lineH + 30
-        // 祖福语背景框
-        const msgBoxX = padding
-        const msgBoxW = W - padding * 2
-        ctx.fillStyle = '#fff9f5'
-        ctx.strokeStyle = '#ffe0c8'
-        ctx.lineWidth = 1
-        ctx.setLineDash([])
-        ctx.beginPath()
-        ctx.roundRect(msgBoxX, msgY - 14, msgBoxW, 36, 8)
+        const my = totalY + totalBarH
+        const boxX = cardX + 16
+        const boxW = cardW - 32
+        rr(boxX, my, boxW, 44, 10)
+        ctx.fillStyle = '#fff8f4'
         ctx.fill()
+        ctx.strokeStyle = '#ffdccb'
+        ctx.lineWidth = 1
         ctx.stroke()
-        // 祖福语文字
         ctx.fillStyle = '#e85d20'
         ctx.font = '14px sans-serif'
         ctx.textAlign = 'center'
-        ctx.fillText(this.customMessage.trim(), W / 2, msgY + 8)
+        ctx.fillText(this.customMessage.trim(), W / 2, my + 28)
       }
 
-      // 底部
-      const footY = H - 14
+      // 底部品牌水印
+      const footY = H - margin - 20
       ctx.font = '11px sans-serif'
-      ctx.fillStyle = '#bbb'
+      ctx.fillStyle = '#c8b0a4'
       ctx.textAlign = 'center'
-      const now = new Date()
-      const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`
-      ctx.fillText(`生成日期：${dateStr}`, W / 2, footY)
+      ctx.fillText('—— 今日午餐 · 用心为家人准备 ——', W / 2, footY)
 
       const base64 = canvas.toDataURL('image/png')
       this.previewImg = base64
