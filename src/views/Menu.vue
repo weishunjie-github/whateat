@@ -1,5 +1,21 @@
 <template>
-  <div class="menu-page">
+  <div
+    class="menu-page"
+    @touchstart="onPullStart"
+    @touchmove="onPullMove"
+    @touchend="onPullEnd"
+  >
+    <!-- 下拉进入首页提示 -->
+    <div
+      class="pull-hint"
+      :class="{ 'pull-hint-anim': !pulling }"
+      :style="{ height: pullDistance + 'px' }"
+    >
+      <span class="pull-hint-inner" v-show="pullDistance > 6">
+        <span class="pull-arrow" :class="{ flip: pullDistance >= pullThreshold }">↓</span>
+        {{ pullDistance >= pullThreshold ? '松开进入首页' : '下拉进入首页' }}
+      </span>
+    </div>
     <!-- 顶部搜索头部 -->
     <div class="search-header">
       <div class="search-header-title">
@@ -112,7 +128,11 @@ export default {
       keyword: '',
       activeTab: 0,
       categoryList,
-      dishes
+      dishes,
+      pulling: false,
+      pullDistance: 0,
+      pullStartY: 0,
+      pullThreshold: 80
     }
   },
   computed: {
@@ -149,6 +169,30 @@ export default {
     },
     goHome() {
       this.$router.push('/start')
+    },
+    onPullStart(e) {
+      // 仅在页面滚动到顶部时才允许触发下拉
+      const top = window.pageYOffset || document.documentElement.scrollTop || 0
+      if (top > 0) { this.pulling = false; return }
+      this.pullStartY = e.touches[0].clientY
+      this.pulling = true
+    },
+    onPullMove(e) {
+      if (!this.pulling) return
+      const top = window.pageYOffset || document.documentElement.scrollTop || 0
+      if (top > 0) { this.pulling = false; this.pullDistance = 0; return }
+      const dy = e.touches[0].clientY - this.pullStartY
+      if (dy <= 0) { this.pullDistance = 0; return }
+      // 阻尼效果，最大下拉 130px
+      this.pullDistance = Math.min(dy * 0.5, 130)
+    },
+    onPullEnd() {
+      if (!this.pulling) return
+      if (this.pullDistance >= this.pullThreshold) {
+        this.$router.push('/start')
+      }
+      this.pulling = false
+      this.pullDistance = 0
     },
     onSearch() {
       // 搜索已通过 computed 实时过滤
@@ -204,6 +248,35 @@ export default {
 .home-entry:active {
   transform: scale(0.93);
   background: rgba(255, 255, 255, 0.35);
+}
+
+/* 下拉进入首页提示 */
+.pull-hint {
+  height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f6f8;
+  color: #ff6034;
+  font-size: 14px;
+}
+.pull-hint-anim {
+  transition: height 0.28s ease;
+}
+.pull-hint-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pull-arrow {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+.pull-arrow.flip {
+  transform: rotate(180deg);
 }
 
 /* 搜索框深度样式 */
