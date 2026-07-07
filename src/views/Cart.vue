@@ -85,11 +85,11 @@
     <van-overlay :show="showPreview" @click="showPreview = false" z-index="999">
       <div class="preview-modal" @click.stop>
         <h3 class="preview-title">今日菜单预览</h3>
-        <div class="preview-tip">
-          <span class="tip-hand">👆</span> 长按图片 · 保存或分享给会做饭的 TA
-        </div>
         <div class="preview-img-wrap">
           <img :src="previewImg" class="preview-img" />
+        </div>
+        <div class="preview-tip">
+          <span class="tip-hand">👆</span> 长按上方图片 · 保存到相册或分享给 TA
         </div>
         <div class="preview-actions">
           <van-button type="danger" round block icon="share-o" @click="shareOrSaveImage">
@@ -106,6 +106,7 @@
 
 <script>
 import { Stepper, Button, Dialog, Toast, Overlay, Icon } from 'vant'
+import QRCode from 'qrcode'
 import EmptyState from '../components/EmptyState.vue'
 
 export default {
@@ -169,10 +170,31 @@ export default {
     selectQuickMsg(msg) {
       this.customMessage = this.customMessage === msg ? '' : msg
     },
-    generateList() {
+    loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => resolve(img)
+        img.onerror = reject
+        img.src = src
+      })
+    },
+    async generateList() {
       if (!this.cartList.length) {
         Toast('购物车为空，请先添加菜品')
         return
+      }
+      // 生成二维码（扫码跳转到站点）
+      const siteUrl = window.location.origin // TODO: 可替换为正式站点域名
+      let qrImg = null
+      try {
+        const qrDataUrl = await QRCode.toDataURL(siteUrl, {
+          margin: 1,
+          width: 160,
+          color: { dark: '#333333', light: '#ffffff' }
+        })
+        qrImg = await this.loadImage(qrDataUrl)
+      } catch (e) {
+        qrImg = null
       }
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
@@ -188,7 +210,7 @@ export default {
       const totalBarH = 46
       const hasMsg = this.customMessage.trim().length > 0
       const msgH = hasMsg ? 64 : 0
-      const footerH = 54
+      const footerH = 120
       const H = listTop + listH + totalBarH + msgH + footerH + margin
 
       canvas.width = W * dpr
@@ -347,24 +369,58 @@ export default {
         ctx.fillText(this.customMessage.trim(), W / 2, my + 28)
       }
 
-      // 底部装饰点
-      const footY = H - margin - 20
+      // ===== 底部区域 =====
+      const fTop = totalY + totalBarH + msgH
+      // 装饰点 + 温暖文案
       ctx.fillStyle = '#ffd9c8'
       for (let i = -1; i <= 1; i++) {
         ctx.beginPath()
-        ctx.arc(W / 2 + i * 10, footY - 15, 2, 0, Math.PI * 2)
+        ctx.arc(W / 2 + i * 10, fTop + 10, 2, 0, Math.PI * 2)
         ctx.fill()
       }
-      // 底部温暖文案
       ctx.font = '11px sans-serif'
       ctx.fillStyle = '#cba99b'
       ctx.textAlign = 'center'
-      ctx.fillText('♡  记得分享给会做饭的 TA 哦  ♡', W / 2, footY)
+      ctx.fillText('♡  记得分享给会做饭的 TA 哦  ♡', W / 2, fTop + 26)
+
+      // 二维码 + 说明（水平居中）
+      const QR = 64
+      const line1 = '扫码发现更多'
+      const line2 = '家常菜谱等你做'
+      ctx.font = 'bold 14px sans-serif'
+      const t1w = ctx.measureText(line1).width
+      ctx.font = '12px sans-serif'
+      const t2w = ctx.measureText(line2).width
+      const textW = Math.max(t1w, t2w)
+      const blockW = QR + 14 + textW
+      const bx = (W - blockW) / 2
+      const qy = fTop + 40
+      if (qrImg) {
+        // 二维码白底圆角衬底
+        rr(bx - 4, qy - 4, QR + 8, QR + 8, 8)
+        ctx.fillStyle = '#ffffff'
+        ctx.fill()
+        ctx.strokeStyle = '#f0e4dd'
+        ctx.lineWidth = 1
+        ctx.stroke()
+        ctx.drawImage(qrImg, bx, qy, QR, QR)
+      }
+      // 右侧说明文字
+      const tx = bx + QR + 14
+      ctx.textAlign = 'left'
+      ctx.fillStyle = '#ff6a3d'
+      ctx.font = 'bold 14px sans-serif'
+      ctx.fillText(line1, tx, qy + 26)
+      ctx.fillStyle = '#999'
+      ctx.font = '12px sans-serif'
+      ctx.fillText(line2, tx, qy + 46)
 
       const base64 = canvas.toDataURL('image/png')
       this.previewImg = base64
       this.showPreview = true
-      this.$store.commit('saveHistoryImg', base64)
+      // 内容签名（菜品+份数+祝福语），用于去重，同一份菜单不重复记录
+      const sign = this.cartList.map(i => `${i.id}x${i.num}`).join('|') + '#' + this.customMessage.trim()
+      this.$store.commit('saveHistoryImg', { img: base64, sign })
     },
     async shareOrSaveImage() {
       try {
@@ -375,7 +431,16 @@ export default {
           await navigator.share({ files: [file], title: '今日午餐菜单' })
           return
         }
-        // 降级为下载
+        // 微信等内置浏览器不支持下载，引导长按图片
+        const isWechat = /micromessenger/i.test(navigator.userAgent)
+        if (isWechat) {
+          Toast({
+            message: '请长按上方图片，保存到相册或分享给 TA',
+            duration: 2500
+          })
+          return
+        }
+        // 非微信环境降级为下载
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -388,7 +453,7 @@ export default {
       } catch (e) {
         if (e && e.name === 'AbortError') return // 用户取消分享
         Toast({
-          message: '保存失败，请长按上方图片保存到相册',
+          message: '请长按上方图片保存到相册',
           duration: 2500
         })
       }
@@ -478,7 +543,7 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  margin: -6px 0 12px;
+  margin: 12px 0;
   font-size: 13px;
   font-weight: 500;
   color: #ff6034;

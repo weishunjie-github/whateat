@@ -49,11 +49,19 @@ export default new Vuex.Store({
       state.cartList = []
       saveLocal(CART_KEY, state.cartList)
     },
-    saveHistoryImg(state, base64) {
-      state.historyImgList.unshift({
-        img: base64,
-        time: new Date().toLocaleString('zh-CN')
-      })
+    saveHistoryImg(state, payload) {
+      // 兼容旧调用（直接传 base64 字符串）
+      const img = typeof payload === 'string' ? payload : payload.img
+      const sign = typeof payload === 'string' ? '' : (payload.sign || '')
+      const time = new Date().toLocaleString('zh-CN')
+      // 同一份菜单（签名相同）不重复记录，仅更新最近一条
+      if (sign && state.historyImgList.length && state.historyImgList[0].sign === sign) {
+        state.historyImgList[0].img = img
+        state.historyImgList[0].time = time
+      } else {
+        const nextId = state.historyImgList.reduce((m, i) => Math.max(m, i.id || 0), 0) + 1
+        state.historyImgList.unshift({ id: nextId, img, sign, time })
+      }
       saveLocal(HISTORY_KEY, state.historyImgList)
     },
     delHistoryImg(state, index) {
