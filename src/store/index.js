@@ -59,6 +59,10 @@ export default new Vuex.Store({
     delHistoryImg(state, index) {
       state.historyImgList.splice(index, 1)
       saveLocal(HISTORY_KEY, state.historyImgList)
+    },
+    clearHistoryImg(state) {
+      state.historyImgList = []
+      saveLocal(HISTORY_KEY, state.historyImgList)
     }
   },
   getters: {

@@ -70,7 +70,7 @@
           icon="orders-o"
           @click="generateList"
         >
-          生成采购清单图
+          生成清单 · 分享给会做饭的 TA
         </van-button>
       </div>
     </template>
@@ -84,19 +84,16 @@
     <!-- 清单预览弹窗 -->
     <van-overlay :show="showPreview" @click="showPreview = false" z-index="999">
       <div class="preview-modal" @click.stop>
-        <h3 class="preview-title">采购清单预览</h3>
+        <h3 class="preview-title">今日菜单预览</h3>
         <div class="preview-tip">
-          <van-icon name="info-o" /> 长按图片可保存或复制
+          <span class="tip-hand">👆</span> 长按图片 · 保存或分享给会做饭的 TA
         </div>
         <div class="preview-img-wrap">
           <img :src="previewImg" class="preview-img" />
         </div>
         <div class="preview-actions">
           <van-button type="danger" round block icon="share-o" @click="shareOrSaveImage">
-            保存 / 分享图片
-          </van-button>
-          <van-button plain round block style="margin-top: 10px" icon="description" @click="copyImage">
-            复制图片
+            分享给会做饭的 TA
           </van-button>
           <van-button plain round block style="margin-top: 10px" @click="showPreview = false">
             关闭
@@ -243,15 +240,30 @@ export default {
       ctx.fillRect(cardX, margin, cardW, headerH)
       ctx.restore()
 
-      // 标题
+      // 标题（带柔和阴影）
+      ctx.save()
+      ctx.shadowColor = 'rgba(0,0,0,0.12)'
+      ctx.shadowBlur = 4
+      ctx.shadowOffsetY = 1
       ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 20px sans-serif'
+      ctx.font = 'bold 21px sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillText('🍱 今日午餐采购清单', W / 2, margin + 42)
-      // 副标题
+      ctx.fillText('🍱 今日午餐菜单', W / 2, margin + 40)
+      ctx.restore()
+      // 副标题胶囊
+      const subText = `${dateStr}   共 ${totalCount} 份`
       ctx.font = '12px sans-serif'
-      ctx.fillStyle = 'rgba(255,255,255,0.92)'
-      ctx.fillText(`${dateStr}  ·  共 ${this.cartList.length} 样 ${totalCount} 份`, W / 2, margin + 70)
+      const subW = ctx.measureText(subText).width + 26
+      const subX = W / 2 - subW / 2
+      const subY = margin + 56
+      rr(subX, subY, subW, 22, 11)
+      ctx.fillStyle = 'rgba(255,255,255,0.22)'
+      ctx.fill()
+      ctx.fillStyle = '#ffffff'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(subText, W / 2, subY + 12)
+      ctx.textBaseline = 'alphabetic'
 
       // 菜品列表
       this.cartList.forEach((item, idx) => {
@@ -309,68 +321,65 @@ export default {
       ctx.font = 'bold 15px sans-serif'
       ctx.fillStyle = '#ff6a3d'
       ctx.textAlign = 'right'
-      ctx.fillText(`${this.cartList.length} 样  ·  ${totalCount} 份`, cardX + cardW - 20, totalY + 30)
+      ctx.fillText(`${totalCount} 份`, cardX + cardW - 20, totalY + 30)
 
       // 祝福语
       if (hasMsg) {
         const my = totalY + totalBarH
         const boxX = cardX + 16
         const boxW = cardW - 32
-        rr(boxX, my, boxW, 44, 10)
-        ctx.fillStyle = '#fff8f4'
+        rr(boxX, my, boxW, 44, 12)
+        ctx.fillStyle = '#fff6f1'
         ctx.fill()
-        ctx.strokeStyle = '#ffdccb'
-        ctx.lineWidth = 1
-        ctx.stroke()
+        // 左侧橙色装饰竖条
+        rr(boxX, my + 8, 4, 28, 2)
+        ctx.fillStyle = '#ff8a5c'
+        ctx.fill()
+        // 左上引号装饰
+        ctx.fillStyle = '#ffcbb3'
+        ctx.font = 'bold 26px Georgia, serif'
+        ctx.textAlign = 'left'
+        ctx.fillText('“', boxX + 16, my + 30)
+        // 祝福语文字（斜体）
         ctx.fillStyle = '#e85d20'
-        ctx.font = '14px sans-serif'
+        ctx.font = 'italic 14px sans-serif'
         ctx.textAlign = 'center'
         ctx.fillText(this.customMessage.trim(), W / 2, my + 28)
       }
 
-      // 底部品牌水印
+      // 底部装饰点
       const footY = H - margin - 20
+      ctx.fillStyle = '#ffd9c8'
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath()
+        ctx.arc(W / 2 + i * 10, footY - 15, 2, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      // 底部温暖文案
       ctx.font = '11px sans-serif'
-      ctx.fillStyle = '#c8b0a4'
+      ctx.fillStyle = '#cba99b'
       ctx.textAlign = 'center'
-      ctx.fillText('—— 今日午餐 · 用心为家人准备 ——', W / 2, footY)
+      ctx.fillText('♡  记得分享给会做饭的 TA 哦  ♡', W / 2, footY)
 
       const base64 = canvas.toDataURL('image/png')
       this.previewImg = base64
       this.showPreview = true
       this.$store.commit('saveHistoryImg', base64)
     },
-    async copyImage() {
-      try {
-        if (!navigator.clipboard || typeof ClipboardItem === 'undefined') {
-          throw new Error('unsupported')
-        }
-        const blob = await (await fetch(this.previewImg)).blob()
-        await navigator.clipboard.write([
-          new ClipboardItem({ [blob.type]: blob })
-        ])
-        Toast.success('图片已复制到剪贴板')
-      } catch (e) {
-        Toast({
-          message: '当前浏览器不支持直接复制，请长按上方图片保存或复制',
-          duration: 2500
-        })
-      }
-    },
     async shareOrSaveImage() {
       try {
         const blob = await (await fetch(this.previewImg)).blob()
-        const file = new File([blob], '采购清单.png', { type: blob.type })
+        const file = new File([blob], '今日菜单.png', { type: blob.type })
         // 优先系统分享（移动端可直接分享到微信/保存相册）
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: '今日午餐采购清单' })
+          await navigator.share({ files: [file], title: '今日午餐菜单' })
           return
         }
         // 降级为下载
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = '采购清单.png'
+        a.download = '今日菜单.png'
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -468,13 +477,24 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
   margin: -6px 0 12px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
   color: #ff6034;
-  background: #fff4f0;
-  padding: 6px 10px;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #fff0e8, #ffe4d6);
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px dashed #ffb995;
+}
+.tip-hand {
+  display: inline-block;
+  font-size: 15px;
+  animation: tip-bounce 1.2s ease-in-out infinite;
+}
+@keyframes tip-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 .preview-img-wrap {
   border: 1px solid #f0f0f0;

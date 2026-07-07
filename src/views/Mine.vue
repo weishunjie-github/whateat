@@ -2,7 +2,16 @@
   <div class="mine-page">
     <!-- 历史采购清单 -->
     <div class="section">
-      <h3 class="section-title">历史采购清单</h3>
+      <div class="section-header">
+        <h3 class="section-title-inline">历史采购清单</h3>
+        <span
+          v-if="historyList.length"
+          class="clear-all-btn"
+          @click="clearAllHistory"
+        >
+          <van-icon name="delete-o" /> 一键清空
+        </span>
+      </div>
       <template v-if="historyList.length">
         <div class="history-grid">
           <div
@@ -31,7 +40,7 @@
     <div class="section tip-section">
       <van-icon name="info-o" color="#ff6034" size="18" />
       <p class="tip-text">
-        本工具仅支持复制清单图片，无法直接分享至社交软件，复制后需手动粘贴发送给他人
+        生成清单后会自动保存到此处。可点击图片查看大图，长按保存或分享给会做饭的 TA
       </p>
     </div>
 
@@ -82,6 +91,14 @@ export default {
           Toast.success('已删除')
         })
         .catch(() => {})
+    },
+    clearAllHistory() {
+      Dialog.confirm({ title: '提示', message: '确定清空全部历史清单记录吗？' })
+        .then(() => {
+          this.$store.commit('clearHistoryImg')
+          Toast.success('已清空')
+        })
+        .catch(() => {})
     }
   }
 }
@@ -107,6 +124,36 @@ export default {
   margin: 0 0 14px;
   padding-bottom: 10px;
   border-bottom: 1px solid #f5f5f5;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.section-title-inline {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+.clear-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  color: #ff6034;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: #fff4f0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.clear-all-btn:active {
+  transform: scale(0.94);
+  background: #ffe4d9;
 }
 .history-grid {
   display: flex;
