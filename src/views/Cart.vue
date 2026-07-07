@@ -85,6 +85,9 @@
     <van-overlay :show="showPreview" @click="showPreview = false" z-index="999">
       <div class="preview-modal" @click.stop>
         <h3 class="preview-title">采购清单预览</h3>
+        <div class="preview-tip">
+          <van-icon name="info-o" /> 长按图片可保存或复制
+        </div>
         <div class="preview-img-wrap">
           <img :src="previewImg" class="preview-img" />
         </div>
@@ -271,17 +274,19 @@ export default {
     },
     async copyImage() {
       try {
-        const blob = await (await fetch(this.previewImg)).blob()
-        if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-          await navigator.clipboard.write([
-            new ClipboardItem({ [blob.type]: blob })
-          ])
-          Toast.success('图片已复制到剪贴板')
-        } else {
-          Toast('当前浏览器不支持复制图片，请手动截图保存')
+        if (!navigator.clipboard || typeof ClipboardItem === 'undefined') {
+          throw new Error('unsupported')
         }
+        const blob = await (await fetch(this.previewImg)).blob()
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type]: blob })
+        ])
+        Toast.success('图片已复制到剪贴板')
       } catch (e) {
-        Toast('当前浏览器不支持复制图片，请手动截图保存')
+        Toast({
+          message: '当前浏览器不支持直接复制，请长按上方图片保存或复制',
+          duration: 2500
+        })
       }
     }
   }
@@ -363,6 +368,18 @@ export default {
   font-weight: 600;
   color: #333;
   text-align: center;
+}
+.preview-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: -6px 0 12px;
+  font-size: 12px;
+  color: #ff6034;
+  background: #fff4f0;
+  padding: 6px 10px;
+  border-radius: 8px;
 }
 .preview-img-wrap {
   border: 1px solid #f0f0f0;
