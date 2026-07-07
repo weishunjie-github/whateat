@@ -32,8 +32,8 @@
         </template>
         <template v-else-if="weather.failed">
           <span class="weather-icon">🌤️</span>
-          <div class="weather-info">
-            <span class="weather-desc-only">天气获取失败</span>
+          <div class="weather-info" @click="retryWeather">
+            <span class="weather-desc-only">天气获取失败，点击重试</span>
           </div>
         </template>
         <template v-else>
@@ -155,33 +155,68 @@ export default {
     loadWeather() {
       // 默认上海坐标，定位失败时兜底
       const fallback = { lat: 31.23, lon: 121.47, city: '上海' }
-      if (navigator.geolocation) {
+      // 安全上下文（https / localhost）优先用浏览器定位（最准）
+      if (navigator.geolocation && window.isSecureContext) {
         navigator.geolocation.getCurrentPosition(
-          pos => this.fetchWeather(pos.coords.latitude, pos.coords.longitude, ''),
-          () => this.fetchWeather(fallback.lat, fallback.lon, fallback.city),
-          { timeout: 5000 }
+          pos => this.fetchWeather(pos.coords.latitude, pos.coords.longitude, '当前位置'),
+          () => this.loadWeatherByIP(fallback),
+          { timeout: 4000, maximumAge: 600000 }
         )
       } else {
+        // 非安全上下文（如手机通过 http 局域网 IP 访问）：浏览器定位被禁用，改用 IP 定位
+        this.loadWeatherByIP(fallback)
+      }
+    },
+    async loadWeatherByIP(fallback) {
+      // 根据公网 IP 反查城市经纬度（无需浏览器定位权限）
+      try {
+        const c = new AbortController()
+        const t = setTimeout(() => c.abort(), 6000)
+        const r = await fetch('https://ipwho.is/', { signal: c.signal })
+        clearTimeout(t)
+        const d = await r.json()
+        if (d && d.success && d.latitude) {
+          this.fetchWeather(d.latitude, d.longitude, d.city || '当前位置')
+          return
+        }
+        throw new Error('ip locate fail')
+      } catch (e) {
+        // IP 定位失败，用默认城市
         this.fetchWeather(fallback.lat, fallback.lon, fallback.city)
       }
     },
-    async fetchWeather(lat, lon, city) {
+    retryWeather() {
+      this.weather = { ...this.weather, loaded: false, failed: false }
+      this.loadWeather()
+    },
+    async fetchWeather(lat, lon, city, retry = 1) {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`
-        const res = await fetch(url)
+        // 请求超时保护（避免网络卡死一直 loading）
+        const controller = new AbortController()
+        const timer = setTimeout(() => controller.abort(), 8000)
+        const res = await fetch(url, { signal: controller.signal })
+        clearTimeout(timer)
+        if (!res.ok) throw new Error('http ' + res.status)
         const data = await res.json()
-        const code = data.current.weather_code
-        const map = WEATHER_MAP[code] || { icon: '🌡️', desc: '未知' }
+        const cur = data && data.current
+        if (!cur) throw new Error('no current data')
+        const map = WEATHER_MAP[cur.weather_code] || { icon: '🌡️', desc: '未知' }
         this.weather = {
           loaded: true,
           failed: false,
           icon: map.icon,
-          temp: Math.round(data.current.temperature_2m),
+          temp: Math.round(cur.temperature_2m),
           desc: map.desc,
           city: city || '当前位置'
         }
       } catch (e) {
-        this.weather = { ...this.weather, loaded: false, failed: true }
+        // 失败自动重试一次，再失败才展示失败态
+        if (retry > 0) {
+          setTimeout(() => this.fetchWeather(lat, lon, city, retry - 1), 1200)
+        } else {
+          this.weather = { ...this.weather, loaded: false, failed: true }
+        }
       }
     },
     goMenu() {
