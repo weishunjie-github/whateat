@@ -67,8 +67,28 @@ import { Button } from 'vant'
 
 const WEEK_MAP = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
-// Open-Meteo weather_code 映射（emoji + 中文）
-const WEATHER_MAP = {
+// ━━━ 天气服务配置 ━━━
+// 主用高德（国内快、有城市名），高德不可用时自动降级 Open-Meteo（国外免Key）
+
+// 高德开放平台 Key（免费申请）：https://console.amap.com → 创建应用 → 添加「Web服务」Key
+const AMAP_KEY = '1a2673ad884056e2b573f5ef007be22f'
+
+// 高德天气中文描述 → emoji
+function weatherEmoji(text) {
+  const t = text || ''
+  if (t.includes('雷')) return '⛈️'
+  if (t.includes('雪')) return '❄️'
+  if (t.includes('雨')) return '🌧️'
+  if (t.includes('雾') || t.includes('霾')) return '🌫️'
+  if (t.includes('沙') || t.includes('尘') || t.includes('风')) return '💨'
+  if (t.includes('阴')) return '☁️'
+  if (t.includes('云')) return '⛅'
+  if (t.includes('晴')) return '☀️'
+  return '🌡️'
+}
+
+// Open-Meteo WMO weather_code → emoji + 中文（降级方案用）
+const WMO_MAP = {
   0: { icon: '☀️', desc: '晴' },
   1: { icon: '🌤️', desc: '晴间多云' },
   2: { icon: '⛅', desc: '多云' },
@@ -153,70 +173,86 @@ export default {
       }
     },
     loadWeather() {
-      // 默认上海坐标，定位失败时兜底
-      const fallback = { lat: 31.23, lon: 121.47, city: '上海' }
-      // 安全上下文（https / localhost）优先用浏览器定位（最准）
-      if (navigator.geolocation && window.isSecureContext) {
-        navigator.geolocation.getCurrentPosition(
-          pos => this.fetchWeather(pos.coords.latitude, pos.coords.longitude, '当前位置'),
-          () => this.loadWeatherByIP(fallback),
-          { timeout: 4000, maximumAge: 600000 }
-        )
-      } else {
-        // 非安全上下文（如手机通过 http 局域网 IP 访问）：浏览器定位被禁用，改用 IP 定位
-        this.loadWeatherByIP(fallback)
-      }
-    },
-    async loadWeatherByIP(fallback) {
-      // 根据公网 IP 反查城市经纬度（无需浏览器定位权限）
-      try {
-        const c = new AbortController()
-        const t = setTimeout(() => c.abort(), 6000)
-        const r = await fetch('https://ipwho.is/', { signal: c.signal })
-        clearTimeout(t)
-        const d = await r.json()
-        if (d && d.success && d.latitude) {
-          this.fetchWeather(d.latitude, d.longitude, d.city || '当前位置')
-          return
-        }
-        throw new Error('ip locate fail')
-      } catch (e) {
-        // IP 定位失败，用默认城市
-        this.fetchWeather(fallback.lat, fallback.lon, fallback.city)
-      }
+      // 主用高德，失败自动降级 Open-Meteo
+      console.log('[天气] 开始获取，先尝试高德方案')
+      this.fetchWeatherByAmap().catch(err => {
+        console.log('[天气] 高德方案失败，降级 Open-Meteo，原因:', err.message)
+        this.fetchWeatherByOpenMeteo()
+      })
     },
     retryWeather() {
       this.weather = { ...this.weather, loaded: false, failed: false }
       this.loadWeather()
     },
-    async fetchWeather(lat, lon, city, retry = 1) {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`
-        // 请求超时保护（避免网络卡死一直 loading）
-        const controller = new AbortController()
-        const timer = setTimeout(() => controller.abort(), 8000)
-        const res = await fetch(url, { signal: controller.signal })
+    setWeather(icon, temp, desc, city) {
+      this.weather = { loaded: true, failed: false, icon, temp, desc, city: city || '当前位置' }
+    },
+    markWeatherFailed() {
+      this.weather = { ...this.weather, loaded: false, failed: true }
+    },
+    fetchWithTimeout(url, ms) {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), ms)
+      return fetch(url, { signal: controller.signal }).then(res => {
         clearTimeout(timer)
         if (!res.ok) throw new Error('http ' + res.status)
-        const data = await res.json()
+        return res
+      })
+    },
+    // ━━━ 方案一：高德（IP 定位 + 实时天气，国内直连）━━━
+    async fetchWeatherByAmap() {
+      // Key 未配置时直接跳过，走降级
+      if (!AMAP_KEY || AMAP_KEY === 'YOUR_AMAP_KEY') throw new Error('no amap key')
+      console.log('[天气][高德] 开始请求')
+      // 1) IP 定位拿城市 adcode（局域网/无法定位时兜底上海 310000）
+      const ipRes = await this.fetchWithTimeout(`https://restapi.amap.com/v3/ip?key=${AMAP_KEY}`, 8000)
+      const ipData = await ipRes.json()
+      console.log('[天气][高德] IP定位返回:', ipData.city, ipData.adcode)
+      const validAdcode = ipData && ipData.adcode && ipData.adcode !== '[]'
+      const adcode = validAdcode ? ipData.adcode : '310000'
+      const cityName = (ipData && ipData.city && ipData.city !== '[]') ? ipData.city : '上海'
+      // 2) 查实时天气
+      const wUrl = `https://restapi.amap.com/v3/weather/weatherInfo?key=${AMAP_KEY}&city=${adcode}&extensions=base`
+      const wRes = await this.fetchWithTimeout(wUrl, 8000)
+      const wData = await wRes.json()
+      console.log('[天气][高德] 天气返回:', wData)
+      const live = wData && wData.lives && wData.lives[0]
+      if (!live) throw new Error('no weather data')
+      this.setWeather(
+        weatherEmoji(live.weather),
+        Math.round(Number(live.temperature)),
+        live.weather || '未知',
+        live.city || cityName
+      )
+      console.log('[天气][高德] 成功:', live.city, live.temperature + '°', live.weather)
+    },
+    // ━━━ 方案二：Open-Meteo 降级（IP 定位 + 天气，免Key）━━━
+    async fetchWeatherByOpenMeteo() {
+      const fallback = { lat: 31.23, lon: 121.47, city: '上海' }
+      console.log('[天气][Open-Meteo] 降级方案开始')
+      try {
+        // IP 定位拿经纬度（失败用上海兜底）
+        let lat = fallback.lat, lon = fallback.lon, city = fallback.city
+        try {
+          const ipData = await this.fetchWithTimeout('https://ipwho.is/', 6000).then(r => r.json())
+          if (ipData && ipData.success && ipData.latitude) {
+            lat = ipData.latitude
+            lon = ipData.longitude
+            city = ipData.city || '当前位置'
+          }
+          console.log('[天气][Open-Meteo] IP定位:', city, lat, lon)
+        } catch (e) { console.log('[天气][Open-Meteo] IP定位失败，用上海兜底') }
+        // 查 Open-Meteo 天气
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`
+        const data = await this.fetchWithTimeout(url, 8000).then(r => r.json())
         const cur = data && data.current
-        if (!cur) throw new Error('no current data')
-        const map = WEATHER_MAP[cur.weather_code] || { icon: '🌡️', desc: '未知' }
-        this.weather = {
-          loaded: true,
-          failed: false,
-          icon: map.icon,
-          temp: Math.round(cur.temperature_2m),
-          desc: map.desc,
-          city: city || '当前位置'
-        }
+        if (!cur) throw new Error('no weather data')
+        const map = WMO_MAP[cur.weather_code] || { icon: '🌡️', desc: '未知' }
+        this.setWeather(map.icon, Math.round(cur.temperature_2m), map.desc, city)
+        console.log('[天气][Open-Meteo] 成功:', city, cur.temperature_2m + '°', map.desc)
       } catch (e) {
-        // 失败自动重试一次，再失败才展示失败态
-        if (retry > 0) {
-          setTimeout(() => this.fetchWeather(lat, lon, city, retry - 1), 1200)
-        } else {
-          this.weather = { ...this.weather, loaded: false, failed: true }
-        }
+        console.log('[天气][Open-Meteo] 失败:', e.message)
+        this.markWeatherFailed()
       }
     },
     goMenu() {
