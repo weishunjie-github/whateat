@@ -100,7 +100,7 @@
 
 <script>
 import { Tag, Toast } from 'vant'
-import { dishes } from '../data/dishes'
+import { dishes, takeawayDishes } from '../data/dishes'
 
 export default {
   name: 'RandomSelect',
@@ -111,8 +111,30 @@ export default {
     return {
       currentMode: 'fourOneSoup',
       isRolling: false,
-      resultList: [],
-      customConfig: [
+      resultList: []
+    }
+  },
+  computed: {
+    appMode() {
+      return this.$store.state.appMode
+    },
+    isTakeaway() {
+      return this.appMode === 'takeaway'
+    },
+    allDishes() {
+      return this.isTakeaway ? takeawayDishes : dishes
+    },
+    customConfig() {
+      if (this.isTakeaway) {
+        return [
+          { label: '杭帮面饭', category: '杭帮面饭', num: 1 },
+          { label: '小吃快餐', category: '小吃快餐', num: 1 },
+          { label: '烧烤炸物', category: '烧烤炸物', num: 0 },
+          { label: '轻食沙拉', category: '轻食沙拉', num: 0 },
+          { label: '奶茶甜品', category: '奶茶甜品', num: 0 }
+        ]
+      }
+      return [
         { label: '中餐炒菜（荤）', category: '中餐炒菜', num: 2 },
         { label: '蔬菜（素）', category: '蔬菜', num: 1 },
         { label: '汤', category: '汤', num: 1 },
@@ -136,12 +158,20 @@ export default {
       }
     },
     tagColor(category) {
-      const map = {
-        '中餐炒菜': '#ff6034',
-        '蔬菜': '#4caf50',
-        '汤': '#2196f3',
-        '烘焙': '#ff9800'
-      }
+      const map = this.isTakeaway
+        ? {
+            '杭帮面饭': '#ff6034',
+            '小吃快餐': '#ff9800',
+            '烧烤炸物': '#e91e63',
+            '轻食沙拉': '#4caf50',
+            '奶茶甜品': '#9c27b0'
+          }
+        : {
+            '中餐炒菜': '#ff6034',
+            '蔬菜': '#4caf50',
+            '汤': '#2196f3',
+            '烘焙': '#ff9800'
+          }
       return map[category] || '#999'
     },
     getRandomItems(arr, count) {
@@ -157,28 +187,48 @@ export default {
         let result = []
 
         if (this.currentMode === 'fourOneSoup') {
-          // 四菜一汤：3荤 + 1素 + 1汤
-          const meat = dishes.filter(d => d.category === '中餐炒菜')
-          const veg = dishes.filter(d => d.category === '蔬菜')
-          const soup = dishes.filter(d => d.category === '汤')
-          result = [
-            ...this.getRandomItems(meat, 3),
-            ...this.getRandomItems(veg, 1),
-            ...this.getRandomItems(soup, 1)
-          ]
+          // 四菜一汤：3荤 + 1素 + 1汤（午餐模式）
+          if (this.isTakeaway) {
+            const main = this.allDishes.filter(d => d.category === '杭帮面饭')
+            const snack = this.allDishes.filter(d => d.category === '小吃快餐')
+            const drink = this.allDishes.filter(d => d.category === '奶茶甜品')
+            result = [
+              ...this.getRandomItems(main, 2),
+              ...this.getRandomItems(snack, 2),
+              ...this.getRandomItems(drink, 1)
+            ]
+          } else {
+            const meat = this.allDishes.filter(d => d.category === '中餐炒菜')
+            const veg = this.allDishes.filter(d => d.category === '蔬菜')
+            const soup = this.allDishes.filter(d => d.category === '汤')
+            result = [
+              ...this.getRandomItems(meat, 3),
+              ...this.getRandomItems(veg, 1),
+              ...this.getRandomItems(soup, 1)
+            ]
+          }
         } else if (this.currentMode === 'oneMeatTwoVeg') {
-          // 一荤两素
-          const meat = dishes.filter(d => d.category === '中餐炒菜')
-          const veg = dishes.filter(d => d.category === '蔬菜')
-          result = [
-            ...this.getRandomItems(meat, 1),
-            ...this.getRandomItems(veg, 2)
-          ]
+          // 一荤两素 / 外卖均衡搭配
+          if (this.isTakeaway) {
+            const main = this.allDishes.filter(d => d.category === '杭帮面饭')
+            const snack = this.allDishes.filter(d => d.category === '小吃快餐')
+            result = [
+              ...this.getRandomItems(main, 2),
+              ...this.getRandomItems(snack, 1)
+            ]
+          } else {
+            const meat = this.allDishes.filter(d => d.category === '中餐炒菜')
+            const veg = this.allDishes.filter(d => d.category === '蔬菜')
+            result = [
+              ...this.getRandomItems(meat, 1),
+              ...this.getRandomItems(veg, 2)
+            ]
+          }
         } else {
           // 自定义模式
           this.customConfig.forEach(cfg => {
             if (cfg.num > 0) {
-              const pool = dishes.filter(d => d.category === cfg.category)
+              const pool = this.allDishes.filter(d => d.category === cfg.category)
               result.push(...this.getRandomItems(pool, cfg.num))
             }
           })

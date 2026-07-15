@@ -5,13 +5,13 @@
         <span slot="icon" slot-scope="props" class="tab-icon">
           <van-icon :name="props.active ? 'orders-o' : 'bars'" />
         </span>
-        <span class="tab-label">菜单</span>
+        <span class="tab-label">{{ isTakeaway ? '外卖' : '菜单' }}</span>
       </van-tabbar-item>
       <van-tabbar-item to="/cart" :badge="cartCount || null">
         <span slot="icon" slot-scope="props" class="tab-icon">
           <van-icon :name="props.active ? 'shopping-cart' : 'cart-o'" />
         </span>
-        <span class="tab-label">下单</span>
+        <span class="tab-label">{{ isTakeaway ? '下单' : '下单' }}</span>
       </van-tabbar-item>
       <van-tabbar-item to="/random">
         <span slot="icon" slot-scope="props" class="tab-icon">
@@ -47,6 +47,9 @@ export default {
   computed: {
     cartCount() {
       return this.$store.getters.cartCount
+    },
+    isTakeaway() {
+      return this.$store.state.appMode === 'takeaway'
     }
   }
 }

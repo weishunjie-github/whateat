@@ -19,7 +19,7 @@
     <!-- 顶部搜索头部 -->
     <div class="search-header">
       <div class="search-header-title">
-        <span>今日午餐</span>
+        <span>{{ pageTitle }}</span>
         <span class="home-entry" @click="goHome">
           <van-icon name="wap-home-o" /> 首页
         </span>
@@ -109,7 +109,7 @@
 
 <script>
 import { Search, Tabs, Tab, Tag, Button, Toast, Icon } from 'vant'
-import { dishes, categoryList } from '../data/dishes'
+import { dishes, categoryList, takeawayDishes, takeawayCategoryList } from '../data/dishes'
 import EmptyState from '../components/EmptyState.vue'
 
 export default {
@@ -127,8 +127,6 @@ export default {
     return {
       keyword: '',
       activeTab: 0,
-      categoryList,
-      dishes,
       pulling: false,
       pullDistance: 0,
       pullStartY: 0,
@@ -136,6 +134,21 @@ export default {
     }
   },
   computed: {
+    appMode() {
+      return this.$store.state.appMode
+    },
+    isTakeaway() {
+      return this.appMode === 'takeaway'
+    },
+    pageTitle() {
+      return this.isTakeaway ? '杭州外卖' : '今日午餐'
+    },
+    categoryList() {
+      return this.isTakeaway ? takeawayCategoryList : categoryList
+    },
+    dishes() {
+      return this.isTakeaway ? takeawayDishes : dishes
+    },
     currentCategory() {
       return this.categoryList[this.activeTab]
     },

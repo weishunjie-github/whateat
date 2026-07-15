@@ -294,3 +294,153 @@ export const dishes = [
     cookStep: '1. 西葫芦洗净切半圆薄片\n2. 蒜切末、干辣椒切段备用\n3. 锅中热油，放蒜末干辣椒爆香\n4. 倒入西葫芦大火快速翻灂2-3分钟\n5. 加盐调味，翻匀即可出锅'
   }
 ]
+
+// ===== 杭州外卖菜单 =====
+export const takeawayCategoryList = ['全部', '杭帮面饭', '小吃快餐', '烧烤炸物', '轻食沙拉', '奶茶甜品']
+
+export const takeawayDishes = [
+  {
+    id: 1001,
+    name: '片儿川',
+    category: '杭帮面饭',
+    thumbImg: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=600&h=400&fit=crop',
+    intro: '杭州最具代表性的汤面，雪菜、笋片、瘦肉片，汤鲜面滑。',
+    cookStep: '1. 面条焯水备用\n2. 笋片、雪菜、瘦肉片炒香\n3. 加高汤烧开，放入面条\n4. 调味后撒葱花出锅'
+  },
+  {
+    id: 1002,
+    name: '葱包桧儿',
+    category: '小吃快餐',
+    thumbImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600&h=400&fit=crop',
+    intro: '杭州传统早点，春饼卷油条加葱，压烤至香脆。',
+    cookStep: '1. 春饼铺平，放油条和葱段\n2. 卷紧后入平底锅压烤\n3. 两面金黄刷甜面酱即可'
+  },
+  {
+    id: 1003,
+    name: '西湖醋鱼',
+    category: '杭帮面饭',
+    thumbImg: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=600&h=400&fit=crop',
+    intro: '杭帮菜经典，鱼肉鲜嫩，酸甜适口，色泽红亮。',
+    cookStep: '1. 草鱼饿养去腥，划刀焯水\n2. 调糖醋汁（酱油、糖、醋、绍酒）\n3. 鱼装盘，淋芡汁，撒姜末'
+  },
+  {
+    id: 1004,
+    name: '东坡肉',
+    category: '杭帮面饭',
+    thumbImg: 'https://images.unsplash.com/photo-1606657408945-1e424688035c?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1606657408945-1e424688035c?w=600&h=400&fit=crop',
+    intro: '肥而不腻、酥而不碎，杭州名菜中的代表作。',
+    cookStep: '1. 五花肉方块焯水\n2. 砂锅底部铺葱姜，肉皮朝下码放\n3. 加黄酒、酱油、冰糖小火焖2小时\n4. 收汁装盘'
+  },
+  {
+    id: 1005,
+    name: '小笼包',
+    category: '小吃快餐',
+    thumbImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600&h=400&fit=crop',
+    intro: '皮薄馅大、汤汁鲜美，杭州人早餐和夜宵都爱点。',
+    cookStep: '1. 肉馅加皮冻调味\n2. 擀薄皮包入肉馅捏褶\n3. 蒸笼大火蒸8-10分钟\n4. 配姜丝醋蘸食'
+  },
+  {
+    id: 1006,
+    name: '炸鸡排',
+    category: '烧烤炸物',
+    thumbImg: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&h=400&fit=crop',
+    intro: '外皮酥脆、肉质多汁，外卖界永远的C位。',
+    cookStep: '1. 鸡胸肉拍松腌制\n2. 裹淀粉、蛋液、面包糠\n3. 中油温炸至金黄\n4. 切块撒椒盐或甘梅粉'
+  },
+  {
+    id: 1007,
+    name: '烧烤羊肉串',
+    category: '烧烤炸物',
+    thumbImg: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&h=400&fit=crop',
+    intro: '夜宵灵魂，孜然辣椒一撒，外卖也能吃出烟火气。',
+    cookStep: '1. 羊肉切块腌制\n2. 穿串烤至出油\n3. 撒孜然、辣椒面、盐\n4. 趁热吃最香'
+  },
+  {
+    id: 1008,
+    name: '虾仁拌川',
+    category: '杭帮面饭',
+    thumbImg: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=600&h=400&fit=crop',
+    intro: '杭州特色拌面，虾仁Q弹，酱香浓郁，锅气十足。',
+    cookStep: '1. 面条煮至八分熟\n2. 虾仁、豆芽、香干过油\n3. 下面条加酱油、糖大火翻拌\n4. 装盘撒葱花'
+  },
+  {
+    id: 1009,
+    name: '生煎包',
+    category: '小吃快餐',
+    thumbImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600&h=400&fit=crop',
+    intro: '底部焦脆，顶部暄软，咬一口汤汁四溢。',
+    cookStep: '1. 包好的包子放入平底锅\n2. 加水盖盖焖煎至水分收干\n3. 淋油煎出脆底\n4. 撒葱花、芝麻出锅'
+  },
+  {
+    id: 1010,
+    name: '轻食鸡胸沙拉',
+    category: '轻食沙拉',
+    thumbImg: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop',
+    intro: '低卡高蛋白，减脂期的健康外卖首选。',
+    cookStep: '1. 鸡胸肉煎熟切片\n2. 生菜、黄瓜、小番茄洗净\n3. 搭配水煮蛋、玉米粒\n4. 淋油醋汁拌匀'
+  },
+  {
+    id: 1011,
+    name: '珍珠奶茶',
+    category: '奶茶甜品',
+    thumbImg: 'https://images.unsplash.com/photo-1558855410-3112e253d704?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1558855410-3112e253d704?w=600&h=400&fit=crop',
+    intro: '奶茶配外卖，快乐加倍，杭州人的下午茶标配。',
+    cookStep: '1. 红茶煮出茶汤\n2. 加奶精/牛奶和糖调制\n3. 杯底加煮好的珍珠\n4. 倒入奶茶摇匀'
+  },
+  {
+    id: 1012,
+    name: '抹茶千层',
+    category: '奶茶甜品',
+    thumbImg: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=400&fit=crop',
+    intro: '细腻抹茶奶油与薄饼层层叠加，饭后甜点首选。',
+    cookStep: '1. 抹茶班戟皮一张张煎好\n2. 奶油加糖打发\n3. 一层皮一层奶油堆叠\n4. 冷藏定型后切块'
+  },
+  {
+    id: 1013,
+    name: '卤肉饭',
+    category: '杭帮面饭',
+    thumbImg: 'https://images.unsplash.com/photo-1606657408945-1e424688035c?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1606657408945-1e424688035c?w=600&h=400&fit=crop',
+    intro: '肉燥香浓，卤汁拌饭一绝，外卖点单常客。',
+    cookStep: '1. 五花肉切丁煸出油脂\n2. 加红葱头、香菇、酱油卤制\n3. 小火炖至软烂\n4. 浇在米饭上配卤蛋'
+  },
+  {
+    id: 1014,
+    name: '炸酱面',
+    category: '杭帮面饭',
+    thumbImg: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=600&h=400&fit=crop',
+    intro: '酱香浓郁，面条劲道，一碗下去很满足。',
+    cookStep: '1. 肉末加甜面酱、黄豆酱炒成炸酱\n2. 黄瓜、胡萝卜切丝\n3. 面条煮熟过凉水\n4. 拌入炸酱和蔬菜丝'
+  },
+  {
+    id: 1015,
+    name: '麻辣香锅',
+    category: '烧烤炸物',
+    thumbImg: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=600&h=400&fit=crop',
+    intro: '荤素一锅炒，麻辣鲜香，外卖聚餐热门选择。',
+    cookStep: '1. 各类食材焯水或油炸\n2. 锅中爆香花椒、干辣椒、豆瓣酱\n3. 倒入食材大火翻匀\n4. 撒芝麻、香菜出锅'
+  },
+  {
+    id: 1016,
+    name: '牛肉汉堡',
+    category: '小吃快餐',
+    thumbImg: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop',
+    intro: '厚实牛肉饼配芝士，外卖快餐中的满足感担当。',
+    cookStep: '1. 牛肉饼煎熟，芝士片融化\n2. 汉堡胚切开烘烤\n3. 放生菜、番茄、酸黄瓜\n4. 夹入肉饼，挤酱'
+  }
+]

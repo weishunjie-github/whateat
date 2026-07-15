@@ -6,6 +6,20 @@
 
     <!-- 内容 -->
     <div class="content">
+      <!-- 模式切换 -->
+      <div class="mode-switch">
+        <span
+          class="mode-tag"
+          :class="{ active: appMode === 'lunch' }"
+          @click="setMode('lunch')"
+        >🍱 今日午餐</span>
+        <span
+          class="mode-tag"
+          :class="{ active: appMode === 'takeaway' }"
+          @click="setMode('takeaway')"
+        >🛵 杭州外卖</span>
+      </div>
+
       <!-- 问候语 -->
       <p class="greeting">{{ greeting }}</p>
 
@@ -46,7 +60,7 @@
 
       <!-- 标语 -->
       <h1 class="slogan">{{ slogan }}</h1>
-      <p class="subtitle">精选家常菜谱，一键生成今日菜单</p>
+      <p class="subtitle">{{ isTakeaway ? '精选杭州外卖，一键生成点餐清单' : '精选家常菜谱，一键生成今日菜单' }}</p>
 
       <!-- 进入菜单 -->
       <van-button
@@ -56,7 +70,7 @@
         class="enter-btn"
         @click="goMenu"
       >
-        看看今天吃什么 →
+        {{ isTakeaway ? '看看今天点什么外卖 →' : '看看今天吃什么 →' }}
       </van-button>
     </div>
 
@@ -68,7 +82,7 @@
 </template>
 
 <script>
-import { Button } from 'vant'
+import { Button, Toast } from 'vant'
 
 const WEEK_MAP = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
@@ -141,6 +155,14 @@ export default {
         desc: '',
         city: ''
       }
+    }
+  },
+  computed: {
+    appMode() {
+      return this.$store.state.appMode
+    },
+    isTakeaway() {
+      return this.appMode === 'takeaway'
     }
   },
   created() {
@@ -262,6 +284,11 @@ export default {
     },
     goMenu() {
       this.$router.push('/menu')
+    },
+    setMode(mode) {
+      if (mode === this.appMode) return
+      this.$store.commit('setAppMode', mode)
+      Toast({ message: mode === 'takeaway' ? '已切换到杭州外卖' : '已切换到今日午餐', duration: 1200 })
     }
   }
 }
@@ -399,6 +426,29 @@ export default {
 }
 .enter-btn:active {
   transform: scale(0.93);
+}
+.mode-switch {
+  display: inline-flex;
+  gap: 8px;
+  background: rgba(255,255,255,0.15);
+  padding: 5px;
+  border-radius: 22px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(4px);
+}
+.mode-tag {
+  padding: 7px 16px;
+  border-radius: 17px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.mode-tag.active {
+  background: rgba(255,255,255,0.95);
+  color: #ff6034;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 .icp-footer {
   position: absolute;

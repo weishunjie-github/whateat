@@ -5,6 +5,7 @@ Vue.use(Vuex)
 
 const CART_KEY = 'whateat_cart'
 const HISTORY_KEY = 'whateat_history'
+const MODE_KEY = 'whateat_app_mode'
 
 function loadLocal(key, fallback) {
   try {
@@ -21,10 +22,15 @@ function saveLocal(key, val) {
 
 export default new Vuex.Store({
   state: {
+    appMode: loadLocal(MODE_KEY, 'lunch'),
     cartList: loadLocal(CART_KEY, []),
     historyImgList: loadLocal(HISTORY_KEY, [])
   },
   mutations: {
+    setAppMode(state, mode) {
+      state.appMode = mode
+      saveLocal(MODE_KEY, mode)
+    },
     addCart(state, dish) {
       const existing = state.cartList.find(item => item.id === dish.id)
       if (existing) {

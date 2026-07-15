@@ -70,21 +70,21 @@
           icon="orders-o"
           @click="generateList"
         >
-          生成今日菜单 · 分享给会做饭的 TA
+          {{ isTakeaway ? '生成外卖清单 · 分享给 TA' : '生成今日菜单 · 分享给会做饭的 TA' }}
         </van-button>
       </div>
     </template>
     <!-- 空状态 -->
     <EmptyState v-else icon="shopping-cart" text="购物车空空如也">
       <van-button type="danger" round size="small" style="margin-top: 16px" @click="$router.push('/menu')">
-        去选菜
+        {{ isTakeaway ? '去点外卖' : '去选菜' }}
       </van-button>
     </EmptyState>
 
     <!-- 清单预览弹窗 -->
     <van-overlay :show="showPreview" @click="showPreview = false" z-index="999">
       <div class="preview-modal" @click.stop>
-        <h3 class="preview-title">今日菜单预览</h3>
+        <h3 class="preview-title">{{ isTakeaway ? '杭州外卖清单预览' : '今日菜单预览' }}</h3>
         <div class="preview-img-wrap">
           <img :src="previewImg" class="preview-img" />
         </div>
@@ -135,6 +135,15 @@ export default {
   computed: {
     cartList() {
       return this.$store.state.cartList
+    },
+    isTakeaway() {
+      return this.$store.state.appMode === 'takeaway'
+    },
+    shareTitle() {
+      return this.isTakeaway ? '杭州外卖清单' : '今日午餐菜单'
+    },
+    fileName() {
+      return this.isTakeaway ? '杭州外卖清单.png' : '今日菜单.png'
     }
   },
   methods: {
@@ -270,7 +279,7 @@ export default {
       ctx.fillStyle = '#ffffff'
       ctx.font = 'bold 21px sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillText('🍱 今日午餐菜单', W / 2, margin + 40)
+      ctx.fillText(this.isTakeaway ? '🛵 杭州外卖清单' : '🍱 今日午餐菜单', W / 2, margin + 40)
       ctx.restore()
       // 副标题胶囊
       const subText = `${dateStr}   共 ${totalCount} 份`
@@ -425,10 +434,10 @@ export default {
     async shareOrSaveImage() {
       try {
         const blob = await (await fetch(this.previewImg)).blob()
-        const file = new File([blob], '今日菜单.png', { type: blob.type })
+        const file = new File([blob], this.fileName, { type: blob.type })
         // 优先系统分享（移动端可直接分享到微信/保存相册）
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: '今日午餐菜单' })
+          await navigator.share({ files: [file], title: this.shareTitle })
           return
         }
         // 微信等内置浏览器不支持下载，引导长按图片
@@ -444,7 +453,7 @@ export default {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = '今日菜单.png'
+        a.download = this.fileName
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)

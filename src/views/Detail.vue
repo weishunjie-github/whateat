@@ -49,7 +49,7 @@
 
 <script>
 import { Tag, Stepper, Button, Icon, Toast } from 'vant'
-import { dishes } from '../data/dishes'
+import { dishes, takeawayDishes } from '../data/dishes'
 
 export default {
   name: 'Detail',
@@ -72,7 +72,8 @@ export default {
   },
   created() {
     const id = parseInt(this.$route.params.id)
-    this.dish = dishes.find(d => d.id === id) || {}
+    const list = this.$store.state.appMode === 'takeaway' ? takeawayDishes : dishes
+    this.dish = list.find(d => d.id === id) || {}
   },
   methods: {
     onImgError(e) {
