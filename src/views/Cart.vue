@@ -184,7 +184,7 @@ export default {
         return
       }
       // 生成二维码（扫码跳转到站点）
-      const siteUrl = window.location.origin // TODO: 可替换为正式站点域名
+      const siteUrl = 'https://www.whateat.online'
       let qrImg = null
       try {
         const qrDataUrl = await QRCode.toDataURL(siteUrl, {

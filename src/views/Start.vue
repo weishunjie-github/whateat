@@ -59,6 +59,11 @@
         看看今天吃什么 →
       </van-button>
     </div>
+
+    <!-- ICP 备案号 -->
+    <div class="icp-footer">
+      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">浙ICP备2026053834号-1</a>
+    </div>
   </div>
 </template>
 
@@ -394,5 +399,22 @@ export default {
 }
 .enter-btn:active {
   transform: scale(0.93);
+}
+.icp-footer {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 2;
+}
+.icp-footer a {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.icp-footer a:active {
+  opacity: 0.7;
 }
 </style>
