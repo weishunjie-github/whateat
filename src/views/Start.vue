@@ -511,16 +511,26 @@ export default {
   left: 0;
   right: 0;
   text-align: center;
-  z-index: 2;
+  z-index: 100;
+  pointer-events: auto;
 }
 .icp-footer a {
+  display: inline-block;
   font-size: 10px;
-  color: rgba(255,255,255,0.28);
+  color: rgba(255,255,255,0.45);
   text-decoration: none;
-  transition: color 0.2s;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: rgba(255,255,255,0.1);
 }
 .icp-footer a:active {
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.7);
+  transform: scale(0.96);
+}
+.icp-footer a:hover {
+  color: rgba(255,255,255,0.7);
+  text-decoration: underline;
 }
 .city-switch {
   display: inline-flex;
