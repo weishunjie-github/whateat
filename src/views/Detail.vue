@@ -10,6 +10,16 @@
       <h1 class="dish-name">{{ dish.name }}</h1>
       <van-tag type="primary" color="#ff6034" size="large">{{ dish.category }}</van-tag>
       <p class="dish-intro">{{ dish.intro }}</p>
+      <div v-if="!isTakeaway" class="dish-info-bar">
+        <div class="dish-info-item">
+          <span class="dish-info-value">{{ dish.taste || '家常' }}</span>
+          <span class="dish-info-label">口味</span>
+        </div>
+        <div class="dish-info-item">
+          <span class="dish-info-value">{{ dish.calories || '-' }}</span>
+          <span class="dish-info-label">kcal / 份</span>
+        </div>
+      </div>
       <div v-if="isTakeaway" class="shop-info-bar">
         <div class="shop-info-item">
           <span class="shop-info-value">¥{{ dish.perPerson }}</span>
@@ -64,12 +74,19 @@
 
 <script>
 import { Tag, Stepper, Button, Icon, Toast } from 'vant'
-import { dishes, takeawayDishes, shanghaiDishes, guangzhouDishes } from '../data/dishes'
+import { dishes, takeawayDishes, shanghaiDishes, guangzhouDishes, suzhouDishes, nanjingDishes, ningboDishes, wenzhouDishes, wuxiDishes, shaoxingDishes, jiaxingDishes } from '../data/dishes'
 
 const CITY_DISHES_MAP = {
   hangzhou: takeawayDishes,
   shanghai: shanghaiDishes,
-  guangzhou: guangzhouDishes
+  guangzhou: guangzhouDishes,
+  suzhou: suzhouDishes,
+  nanjing: nanjingDishes,
+  ningbo: ningboDishes,
+  wenzhou: wenzhouDishes,
+  wuxi: wuxiDishes,
+  shaoxing: shaoxingDishes,
+  jiaxing: jiaxingDishes
 }
 
 export default {
@@ -153,6 +170,29 @@ export default {
   color: #666;
   line-height: 1.6;
   margin: 12px 0 0;
+}
+.dish-info-bar {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f0f9ff, #fff);
+  border-radius: 10px;
+  border: 1px solid #bae7ff;
+}
+.dish-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dish-info-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1890ff;
+}
+.dish-info-label {
+  font-size: 12px;
+  color: #999;
 }
 .shop-info-bar {
   display: flex;

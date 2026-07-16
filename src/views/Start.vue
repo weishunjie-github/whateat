@@ -20,8 +20,9 @@
         >🛵 {{ cityName }}外卖</span>
       </div>
       <div v-if="isTakeaway" class="city-switch" @click="showCityPicker = true">
-        <van-icon name="location-o" /> 切换城市 · {{ cityName }}
+        <van-icon name="location-o" /> 外卖城市：{{ cityName }}
       </div>
+      <div v-if="isTakeaway" class="city-tip">外卖城市与天气定位相互独立</div>
 
       <!-- 问候语 -->
       <p class="greeting">{{ greeting }}</p>
@@ -44,7 +45,7 @@
           <span class="weather-icon">{{ weather.icon }}</span>
           <div class="weather-info">
             <span class="weather-temp">{{ weather.temp }}°</span>
-            <span class="weather-desc">{{ weather.desc }} · {{ weather.city }}</span>
+            <span class="weather-desc">{{ weather.desc }} · {{ weather.city }} · 天气定位</span>
           </div>
         </template>
         <template v-else-if="weather.failed">
@@ -110,7 +111,14 @@ const WEEK_MAP = ['星期日', '星期一', '星期二', '星期三', '星期四
 const CITY_OPTIONS = [
   { label: '杭州', value: 'hangzhou' },
   { label: '上海', value: 'shanghai' },
-  { label: '广州', value: 'guangzhou' }
+  { label: '广州', value: 'guangzhou' },
+  { label: '苏州', value: 'suzhou' },
+  { label: '南京', value: 'nanjing' },
+  { label: '宁波', value: 'ningbo' },
+  { label: '温州', value: 'wenzhou' },
+  { label: '无锡', value: 'wuxi' },
+  { label: '绍兴', value: 'shaoxing' },
+  { label: '嘉兴', value: 'jiaxing' }
 ]
 
 // ━━━ 天气服务配置 ━━━
@@ -199,7 +207,7 @@ export default {
       return this.$store.state.city
     },
     cityName() {
-      const map = { hangzhou: '杭州', shanghai: '上海', guangzhou: '广州' }
+      const map = { hangzhou: '杭州', shanghai: '上海', guangzhou: '广州', suzhou: '苏州', nanjing: '南京', ningbo: '宁波', wenzhou: '温州', wuxi: '无锡', shaoxing: '绍兴', jiaxing: '嘉兴' }
       return map[this.currentCity] || '杭州'
     }
   },
@@ -523,7 +531,7 @@ export default {
   background: rgba(255,255,255,0.15);
   padding: 6px 14px;
   border-radius: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 6px;
   backdrop-filter: blur(4px);
   cursor: pointer;
   transition: all 0.2s;
@@ -531,6 +539,11 @@ export default {
 .city-switch:active {
   background: rgba(255,255,255,0.25);
   transform: scale(0.96);
+}
+.city-tip {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 16px;
 }
 .city-picker {
   padding: 16px 20px 24px;

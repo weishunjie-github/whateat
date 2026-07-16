@@ -106,18 +106,32 @@
 
 <script>
 import { Tag, Toast } from 'vant'
-import { dishes, takeawayDishes, shanghaiDishes, guangzhouDishes } from '../data/dishes'
+import { dishes, takeawayDishes, shanghaiDishes, guangzhouDishes, suzhouDishes, nanjingDishes, ningboDishes, wenzhouDishes, wuxiDishes, shaoxingDishes, jiaxingDishes } from '../data/dishes'
 import BackToTop from '../components/BackToTop.vue'
 
 const CITY_NAME_MAP = {
   hangzhou: '杭州',
   shanghai: '上海',
-  guangzhou: '广州'
+  guangzhou: '广州',
+  suzhou: '苏州',
+  nanjing: '南京',
+  ningbo: '宁波',
+  wenzhou: '温州',
+  wuxi: '无锡',
+  shaoxing: '绍兴',
+  jiaxing: '嘉兴'
 }
 const CITY_DISHES_MAP = {
   hangzhou: takeawayDishes,
   shanghai: shanghaiDishes,
-  guangzhou: guangzhouDishes
+  guangzhou: guangzhouDishes,
+  suzhou: suzhouDishes,
+  nanjing: nanjingDishes,
+  ningbo: ningboDishes,
+  wenzhou: wenzhouDishes,
+  wuxi: wuxiDishes,
+  shaoxing: shaoxingDishes,
+  jiaxing: jiaxingDishes
 }
 
 export default {

@@ -61,9 +61,9 @@
       v-model="activeTab"
       color="#ff6034"
       title-active-color="#ff6034"
-      sticky
       line-width="30"
       class="custom-tabs"
+      :class="{ 'tabs-sticky': tabsSticky }"
     >
       <van-tab
         v-for="cat in categoryList"
@@ -89,8 +89,12 @@
             <template v-if="isTakeaway">
               <van-tag color="#ffb800" text-color="#fff" size="medium" style="margin-left: 6px">⭐ {{ dish.rating }}</van-tag>
             </template>
+            <template v-if="!isTakeaway && dish.taste">
+              <van-tag color="#ff9a52" text-color="#fff" size="medium" style="margin-left: 6px">{{ dish.taste }}</van-tag>
+            </template>
           </div>
           <div class="dish-intro">{{ dish.intro }}</div>
+          <div v-if="!isTakeaway && dish.calories" class="dish-calories">🔥 约 {{ dish.calories }} kcal / 份</div>
           <div v-if="isTakeaway" class="shop-meta">
             <span>人均 ¥{{ dish.perPerson }}</span>
             <span>{{ dish.deliveryTime }}</span>
@@ -139,24 +143,45 @@
 
 <script>
 import { Search, Tabs, Tab, Tag, Button, Toast, Icon, Popup } from 'vant'
-import { dishes, categoryList, takeawayDishes, takeawayCategoryList, shanghaiDishes, guangzhouDishes } from '../data/dishes'
+import { dishes, categoryList, takeawayDishes, takeawayCategoryList, shanghaiDishes, guangzhouDishes, suzhouDishes, nanjingDishes, ningboDishes, wenzhouDishes, wuxiDishes, shaoxingDishes, jiaxingDishes } from '../data/dishes'
 import EmptyState from '../components/EmptyState.vue'
 import BackToTop from '../components/BackToTop.vue'
 
 const CITY_OPTIONS = [
   { label: '杭州', value: 'hangzhou' },
   { label: '上海', value: 'shanghai' },
-  { label: '广州', value: 'guangzhou' }
+  { label: '广州', value: 'guangzhou' },
+  { label: '苏州', value: 'suzhou' },
+  { label: '南京', value: 'nanjing' },
+  { label: '宁波', value: 'ningbo' },
+  { label: '温州', value: 'wenzhou' },
+  { label: '无锡', value: 'wuxi' },
+  { label: '绍兴', value: 'shaoxing' },
+  { label: '嘉兴', value: 'jiaxing' }
 ]
 const CITY_NAME_MAP = {
   hangzhou: '杭州',
   shanghai: '上海',
-  guangzhou: '广州'
+  guangzhou: '广州',
+  suzhou: '苏州',
+  nanjing: '南京',
+  ningbo: '宁波',
+  wenzhou: '温州',
+  wuxi: '无锡',
+  shaoxing: '绍兴',
+  jiaxing: '嘉兴'
 }
 const CITY_DISHES_MAP = {
   hangzhou: takeawayDishes,
   shanghai: shanghaiDishes,
-  guangzhou: guangzhouDishes
+  guangzhou: guangzhouDishes,
+  suzhou: suzhouDishes,
+  nanjing: nanjingDishes,
+  ningbo: ningboDishes,
+  wenzhou: wenzhouDishes,
+  wuxi: wuxiDishes,
+  shaoxing: shaoxingDishes,
+  jiaxing: jiaxingDishes
 }
 
 export default {
@@ -181,7 +206,8 @@ export default {
       pullStartY: 0,
       pullThreshold: 80,
       showCityPicker: false,
-      cityOptions: CITY_OPTIONS
+      cityOptions: CITY_OPTIONS,
+      tabsSticky: false
     }
   },
   computed: {
@@ -274,12 +300,48 @@ export default {
     onSearch() {
       // 搜索已通过 computed 实时过滤
     },
+    observeHeader() {
+      const header = this.$el.querySelector('.search-header')
+      if (!header || !window.IntersectionObserver) {
+        // 兜底：用 scroll 监听
+        this.observeHeaderByScroll()
+        return
+      }
+      this.headerObserver = new IntersectionObserver(
+        ([entry]) => {
+          this.tabsSticky = !entry.isIntersecting
+        },
+        { threshold: 0 }
+      )
+      this.headerObserver.observe(header)
+    },
+    observeHeaderByScroll() {
+      const header = this.$el.querySelector('.search-header')
+      if (!header) return
+      const onScroll = () => {
+        const rect = header.getBoundingClientRect()
+        this.tabsSticky = rect.bottom <= 0
+      }
+      window.addEventListener('scroll', onScroll, { passive: true })
+      onScroll()
+      this.$once('hook:beforeDestroy', () => {
+        window.removeEventListener('scroll', onScroll)
+      })
+    },
     goDetail(id) {
       this.$router.push(`/detail/${id}`)
     },
     quickAdd(dish) {
       this.$store.commit('addCart', { ...dish, num: 1 })
       Toast.success({ message: '已加入购物车', duration: 1200 })
+    }
+  },
+  mounted() {
+    this.observeHeader()
+  },
+  beforeDestroy() {
+    if (this.headerObserver) {
+      this.headerObserver.disconnect()
     }
   }
 }
@@ -428,19 +490,53 @@ export default {
 }
 
 /* 分类标签 */
-.menu-page >>> .custom-tabs .van-tabs__nav {
+.menu-page >>> .custom-tabs .van-tabs__wrap {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 999 !important;
   background: #fff;
+  will-change: transform, box-shadow;
+  transition: background 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    backdrop-filter 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.menu-page >>> .custom-tabs.tabs-sticky .van-tabs__wrap {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.97) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+}
+.menu-page >>> .custom-tabs.tabs-sticky .van-tabs__wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 96, 52, 0.25), transparent);
+}
+.menu-page >>> .custom-tabs .van-tabs__nav {
+  background: transparent;
 }
 .menu-page >>> .custom-tabs .van-tab {
   font-size: 14px;
   font-weight: 500;
+  transition: color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .menu-page >>> .custom-tabs .van-tab--active {
   font-weight: 600;
+  transform: scale(1.03);
 }
 .menu-page >>> .custom-tabs .van-tabs__line {
   height: 3px;
   border-radius: 3px;
+  transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .dish-list {
   padding: 12px 14px;
@@ -498,6 +594,12 @@ export default {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.5;
+}
+.dish-calories {
+  font-size: 11px;
+  color: #ff8a5c;
+  margin-top: 4px;
+  font-weight: 500;
 }
 .shop-meta {
   display: flex;

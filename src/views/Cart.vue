@@ -142,7 +142,7 @@ export default {
       return this.$store.state.appMode === 'takeaway'
     },
     cityName() {
-      const map = { hangzhou: '杭州', shanghai: '上海', guangzhou: '广州' }
+      const map = { hangzhou: '杭州', shanghai: '上海', guangzhou: '广州', suzhou: '苏州', nanjing: '南京', ningbo: '宁波', wenzhou: '温州', wuxi: '无锡', shaoxing: '绍兴', jiaxing: '嘉兴' }
       return map[this.$store.state.city] || '杭州'
     },
     shareTitle() {
