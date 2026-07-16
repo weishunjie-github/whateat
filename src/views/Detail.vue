@@ -64,7 +64,13 @@
 
 <script>
 import { Tag, Stepper, Button, Icon, Toast } from 'vant'
-import { dishes, takeawayDishes } from '../data/dishes'
+import { dishes, takeawayDishes, shanghaiDishes, guangzhouDishes } from '../data/dishes'
+
+const CITY_DISHES_MAP = {
+  hangzhou: takeawayDishes,
+  shanghai: shanghaiDishes,
+  guangzhou: guangzhouDishes
+}
 
 export default {
   name: 'Detail',
@@ -90,7 +96,9 @@ export default {
   },
   created() {
     const id = parseInt(this.$route.params.id)
-    const list = this.$store.state.appMode === 'takeaway' ? takeawayDishes : dishes
+    const list = this.isTakeaway
+      ? (CITY_DISHES_MAP[this.$store.state.city] || takeawayDishes)
+      : dishes
     this.dish = list.find(d => d.id === id) || {}
   },
   methods: {

@@ -39,6 +39,12 @@ const routes = [
     meta: { showTabBar: true }
   },
   {
+    path: '/history',
+    name: 'History',
+    component: () => import('../views/History.vue'),
+    meta: { showTabBar: false }
+  },
+  {
     path: '/random',
     name: 'Random',
     component: () => import('../views/Random.vue'),

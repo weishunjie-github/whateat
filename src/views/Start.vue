@@ -17,7 +17,10 @@
           class="mode-tag"
           :class="{ active: appMode === 'takeaway' }"
           @click="setMode('takeaway')"
-        >🛵 杭州外卖</span>
+        >🛵 {{ cityName }}外卖</span>
+      </div>
+      <div v-if="isTakeaway" class="city-switch" @click="showCityPicker = true">
+        <van-icon name="location-o" /> 切换城市 · {{ cityName }}
       </div>
 
       <!-- 问候语 -->
@@ -60,7 +63,7 @@
 
       <!-- 标语 -->
       <h1 class="slogan">{{ slogan }}</h1>
-      <p class="subtitle">{{ isTakeaway ? '精选杭州外卖，一键生成点餐清单' : '精选家常菜谱，一键生成今日菜单' }}</p>
+      <p class="subtitle">{{ isTakeaway ? `精选${cityName}外卖，一键生成点餐清单` : '精选家常菜谱，一键生成今日菜单' }}</p>
 
       <!-- 进入菜单 -->
       <van-button
@@ -70,7 +73,7 @@
         class="enter-btn"
         @click="goMenu"
       >
-        {{ isTakeaway ? '看看今天点什么外卖 →' : '看看今天吃什么 →' }}
+        {{ isTakeaway ? `看看${cityName}今天点什么外卖 →` : '看看今天吃什么 →' }}
       </van-button>
     </div>
 
@@ -78,13 +81,37 @@
     <div class="icp-footer">
       <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">浙ICP备2026053834号-1</a>
     </div>
+
+    <!-- 城市选择弹窗 -->
+    <van-popup v-model="showCityPicker" round position="bottom" :style="{ height: '40%' }">
+      <div class="city-picker">
+        <div class="city-picker-title">切换城市</div>
+        <div class="city-list">
+          <div
+            v-for="city in cityOptions"
+            :key="city.value"
+            class="city-item"
+            :class="{ active: currentCity === city.value }"
+            @click="switchCity(city.value)"
+          >
+            <span class="city-name">{{ city.label }}</span>
+            <van-icon v-if="currentCity === city.value" name="success" class="city-check" />
+          </div>
+        </div>
+      </div>
+    </van-popup>
   </div>
 </template>
 
 <script>
-import { Button, Toast } from 'vant'
+import { Button, Toast, Popup, Icon } from 'vant'
 
 const WEEK_MAP = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+const CITY_OPTIONS = [
+  { label: '杭州', value: 'hangzhou' },
+  { label: '上海', value: 'shanghai' },
+  { label: '广州', value: 'guangzhou' }
+]
 
 // ━━━ 天气服务配置 ━━━
 // 主用高德（国内快、有城市名），高德不可用时自动降级 Open-Meteo（国外免Key）
@@ -139,7 +166,9 @@ const WMO_MAP = {
 export default {
   name: 'Home',
   components: {
-    [Button.name]: Button
+    [Button.name]: Button,
+    [Popup.name]: Popup,
+    [Icon.name]: Icon
   },
   data() {
     return {
@@ -154,7 +183,9 @@ export default {
         temp: '',
         desc: '',
         city: ''
-      }
+      },
+      showCityPicker: false,
+      cityOptions: CITY_OPTIONS
     }
   },
   computed: {
@@ -163,6 +194,13 @@ export default {
     },
     isTakeaway() {
       return this.appMode === 'takeaway'
+    },
+    currentCity() {
+      return this.$store.state.city
+    },
+    cityName() {
+      const map = { hangzhou: '杭州', shanghai: '上海', guangzhou: '广州' }
+      return map[this.currentCity] || '杭州'
     }
   },
   created() {
@@ -288,7 +326,16 @@ export default {
     setMode(mode) {
       if (mode === this.appMode) return
       this.$store.commit('setAppMode', mode)
-      Toast({ message: mode === 'takeaway' ? '已切换到杭州外卖' : '已切换到今日午餐', duration: 1200 })
+      Toast({ message: mode === 'takeaway' ? `已切换到${this.cityName}外卖` : '已切换到今日午餐', duration: 1200 })
+    },
+    switchCity(city) {
+      if (city === this.currentCity) {
+        this.showCityPicker = false
+        return
+      }
+      this.$store.commit('setCity', city)
+      this.showCityPicker = false
+      Toast.success({ message: `已切换至${this.cityName}`, duration: 1200 })
     }
   }
 }
@@ -452,19 +499,72 @@ export default {
 }
 .icp-footer {
   position: absolute;
-  bottom: 18px;
+  bottom: 8px;
   left: 0;
   right: 0;
   text-align: center;
   z-index: 2;
 }
 .icp-footer a {
-  font-size: 12px;
-  color: rgba(255,255,255,0.7);
+  font-size: 10px;
+  color: rgba(255,255,255,0.28);
   text-decoration: none;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  transition: color 0.2s;
 }
 .icp-footer a:active {
-  opacity: 0.7;
+  color: rgba(255,255,255,0.5);
+}
+.city-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.15);
+  padding: 6px 14px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.city-switch:active {
+  background: rgba(255,255,255,0.25);
+  transform: scale(0.96);
+}
+.city-picker {
+  padding: 16px 20px 24px;
+}
+.city-picker-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.city-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.city-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f7f8fa;
+  font-size: 15px;
+  color: #333;
+  transition: all 0.2s;
+}
+.city-item.active {
+  background: #fff4ef;
+  color: #ff6034;
+  font-weight: 600;
+}
+.city-check {
+  font-size: 18px;
+  color: #ff6034;
 }
 </style>

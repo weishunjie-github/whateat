@@ -20,13 +20,16 @@
     <div class="search-header">
       <div class="search-header-title">
         <span>{{ pageTitle }}</span>
+        <span v-if="isTakeaway" class="city-switch" @click="showCityPicker = true">
+          <van-icon name="location-o" /> {{ cityName }}
+        </span>
         <span class="home-entry" @click="goHome">
           <van-icon name="wap-home-o" /> 首页
         </span>
       </div>
       <van-search
         v-model="keyword"
-        placeholder="搜索菜品名称"
+        :placeholder="isTakeaway ? '搜索店铺名称' : '搜索菜品名称'"
         shape="round"
         background="transparent"
         class="custom-search"
@@ -34,6 +37,25 @@
         @clear="keyword = ''"
       />
     </div>
+
+    <!-- 城市选择弹窗 -->
+    <van-popup v-model="showCityPicker" round position="bottom" :style="{ height: '40%' }">
+      <div class="city-picker">
+        <div class="city-picker-title">切换城市</div>
+        <div class="city-list">
+          <div
+            v-for="city in cityOptions"
+            :key="city.value"
+            class="city-item"
+            :class="{ active: currentCity === city.value }"
+            @click="switchCity(city.value)"
+          >
+            <span class="city-name">{{ city.label }}</span>
+            <van-icon v-if="currentCity === city.value" name="success" class="city-check" />
+          </div>
+        </div>
+      </div>
+    </van-popup>
     <!-- 分类标签 -->
     <van-tabs
       v-model="activeTab"
@@ -111,13 +133,31 @@
         </div>
       </div>
     </transition>
+    <BackToTop />
   </div>
 </template>
 
 <script>
-import { Search, Tabs, Tab, Tag, Button, Toast, Icon } from 'vant'
-import { dishes, categoryList, takeawayDishes, takeawayCategoryList } from '../data/dishes'
+import { Search, Tabs, Tab, Tag, Button, Toast, Icon, Popup } from 'vant'
+import { dishes, categoryList, takeawayDishes, takeawayCategoryList, shanghaiDishes, guangzhouDishes } from '../data/dishes'
 import EmptyState from '../components/EmptyState.vue'
+import BackToTop from '../components/BackToTop.vue'
+
+const CITY_OPTIONS = [
+  { label: '杭州', value: 'hangzhou' },
+  { label: '上海', value: 'shanghai' },
+  { label: '广州', value: 'guangzhou' }
+]
+const CITY_NAME_MAP = {
+  hangzhou: '杭州',
+  shanghai: '上海',
+  guangzhou: '广州'
+}
+const CITY_DISHES_MAP = {
+  hangzhou: takeawayDishes,
+  shanghai: shanghaiDishes,
+  guangzhou: guangzhouDishes
+}
 
 export default {
   name: 'Menu',
@@ -128,7 +168,9 @@ export default {
     [Tag.name]: Tag,
     [Button.name]: Button,
     [Icon.name]: Icon,
-    EmptyState
+    EmptyState,
+    BackToTop,
+    [Popup.name]: Popup
   },
   data() {
     return {
@@ -137,7 +179,9 @@ export default {
       pulling: false,
       pullDistance: 0,
       pullStartY: 0,
-      pullThreshold: 80
+      pullThreshold: 80,
+      showCityPicker: false,
+      cityOptions: CITY_OPTIONS
     }
   },
   computed: {
@@ -147,14 +191,21 @@ export default {
     isTakeaway() {
       return this.appMode === 'takeaway'
     },
+    currentCity() {
+      return this.$store.state.city
+    },
+    cityName() {
+      return CITY_NAME_MAP[this.currentCity] || '杭州'
+    },
     pageTitle() {
-      return this.isTakeaway ? '杭州外卖' : '今日午餐'
+      return this.isTakeaway ? `${this.cityName}外卖` : '今日午餐'
     },
     categoryList() {
       return this.isTakeaway ? takeawayCategoryList : categoryList
     },
     dishes() {
-      return this.isTakeaway ? takeawayDishes : dishes
+      if (!this.isTakeaway) return dishes
+      return CITY_DISHES_MAP[this.currentCity] || takeawayDishes
     },
     currentCategory() {
       return this.categoryList[this.activeTab]
@@ -189,6 +240,12 @@ export default {
     },
     goHome() {
       this.$router.push('/start')
+    },
+    switchCity(city) {
+      this.$store.commit('setCity', city)
+      this.showCityPicker = false
+      this.activeTab = 0
+      Toast.success({ message: `已切换至${CITY_NAME_MAP[city]}`, duration: 1200 })
     },
     onPullStart(e) {
       // 仅在页面滚动到顶部时才允许触发下拉
@@ -252,6 +309,23 @@ export default {
   margin-bottom: 8px;
   letter-spacing: 1px;
 }
+.city-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 4px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.city-switch:active {
+  transform: scale(0.93);
+  background: rgba(255, 255, 255, 0.35);
+}
 .home-entry {
   display: inline-flex;
   align-items: center;
@@ -268,6 +342,48 @@ export default {
 .home-entry:active {
   transform: scale(0.93);
   background: rgba(255, 255, 255, 0.35);
+}
+
+/* 城市选择弹窗 */
+.city-picker {
+  padding: 20px 18px;
+}
+.city-picker-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.city-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.city-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #f7f8fa;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.city-item.active {
+  background: #fff4f0;
+  color: #ff6034;
+  border: 1px solid #ff6034;
+}
+.city-item:active {
+  opacity: 0.8;
+}
+.city-name {
+  font-size: 15px;
+  font-weight: 500;
+}
+.city-check {
+  font-size: 18px;
 }
 
 /* 下拉进入首页提示 */

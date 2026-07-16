@@ -2,7 +2,7 @@
   <div class="random-page">
     <!-- 顶部标题 -->
     <div class="page-header">
-      <div class="header-title">{{ isTakeaway ? '🛵 随机选店' : '🎲 随机选菜' }}</div>
+      <div class="header-title">{{ isTakeaway ? `🛵 ${cityName}随机选店` : '🎲 随机选菜' }}</div>
       <div class="header-desc">{{ isTakeaway ? '中午点哪家外卖，交给天意' : '让选择困难症不再困难' }}</div>
     </div>
 
@@ -100,17 +100,31 @@
         </div>
       </div>
     </transition>
+    <BackToTop />
   </div>
 </template>
 
 <script>
 import { Tag, Toast } from 'vant'
-import { dishes, takeawayDishes } from '../data/dishes'
+import { dishes, takeawayDishes, shanghaiDishes, guangzhouDishes } from '../data/dishes'
+import BackToTop from '../components/BackToTop.vue'
+
+const CITY_NAME_MAP = {
+  hangzhou: '杭州',
+  shanghai: '上海',
+  guangzhou: '广州'
+}
+const CITY_DISHES_MAP = {
+  hangzhou: takeawayDishes,
+  shanghai: shanghaiDishes,
+  guangzhou: guangzhouDishes
+}
 
 export default {
   name: 'RandomSelect',
   components: {
-    [Tag.name]: Tag
+    [Tag.name]: Tag,
+    BackToTop
   },
   data() {
     return {
@@ -126,8 +140,15 @@ export default {
     isTakeaway() {
       return this.appMode === 'takeaway'
     },
+    currentCity() {
+      return this.$store.state.city
+    },
+    cityName() {
+      return CITY_NAME_MAP[this.currentCity] || ''
+    },
     allDishes() {
-      return this.isTakeaway ? takeawayDishes : dishes
+      if (!this.isTakeaway) return dishes
+      return CITY_DISHES_MAP[this.currentCity] || takeawayDishes
     },
     customConfig() {
       if (this.isTakeaway) {
@@ -136,7 +157,13 @@ export default {
           { label: '面食小吃', category: '面食小吃', num: 0 },
           { label: '烧烤夜宵', category: '烧烤夜宵', num: 0 },
           { label: '奶茶甜品', category: '奶茶甜品', num: 0 },
-          { label: '咖啡轻食', category: '咖啡轻食', num: 0 }
+          { label: '咖啡轻食', category: '咖啡轻食', num: 0 },
+          { label: '日韩料理', category: '日韩料理', num: 0 },
+          { label: '火锅串串', category: '火锅串串', num: 0 },
+          { label: '川湘赣菜', category: '川湘赣菜', num: 0 },
+          { label: '粥粉汤饭', category: '粥粉汤饭', num: 0 },
+          { label: '烘焙甜品', category: '烘焙甜品', num: 0 },
+          { label: '水果切', category: '水果切', num: 0 }
         ]
       }
       return [
@@ -169,7 +196,13 @@ export default {
             '面食小吃': '#ff9800',
             '烧烤夜宵': '#e91e63',
             '奶茶甜品': '#9c27b0',
-            '咖啡轻食': '#4caf50'
+            '咖啡轻食': '#4caf50',
+            '日韩料理': '#2196f3',
+            '火锅串串': '#f44336',
+            '川湘赣菜': '#ff5722',
+            '粥粉汤饭': '#00bcd4',
+            '烘焙甜品': '#795548',
+            '水果切': '#8bc34a'
           }
         : {
             '中餐炒菜': '#ff6034',

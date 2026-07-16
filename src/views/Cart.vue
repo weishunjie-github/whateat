@@ -86,7 +86,7 @@
     <!-- 清单预览弹窗 -->
     <van-overlay :show="showPreview" @click="showPreview = false" z-index="999">
       <div class="preview-modal" @click.stop>
-        <h3 class="preview-title">{{ isTakeaway ? '杭州外卖清单预览' : '今日菜单预览' }}</h3>
+        <h3 class="preview-title">{{ isTakeaway ? `${cityName}外卖清单预览` : '今日菜单预览' }}</h3>
         <div class="preview-img-wrap">
           <img :src="previewImg" class="preview-img" />
         </div>
@@ -141,11 +141,15 @@ export default {
     isTakeaway() {
       return this.$store.state.appMode === 'takeaway'
     },
+    cityName() {
+      const map = { hangzhou: '杭州', shanghai: '上海', guangzhou: '广州' }
+      return map[this.$store.state.city] || '杭州'
+    },
     shareTitle() {
-      return this.isTakeaway ? '杭州外卖清单' : '今日午餐菜单'
+      return this.isTakeaway ? `${this.cityName}外卖清单` : '今日午餐菜单'
     },
     fileName() {
-      return this.isTakeaway ? '杭州外卖清单.png' : '今日菜单.png'
+      return this.isTakeaway ? `${this.cityName}外卖清单.png` : '今日菜单.png'
     }
   },
   methods: {
@@ -281,7 +285,7 @@ export default {
       ctx.fillStyle = '#ffffff'
       ctx.font = 'bold 21px sans-serif'
       ctx.textAlign = 'center'
-      ctx.fillText(this.isTakeaway ? '🛵 杭州外卖清单' : '🍱 今日午餐菜单', W / 2, margin + 40)
+      ctx.fillText(this.isTakeaway ? `🛵 ${this.cityName}外卖清单` : '🍱 今日午餐菜单', W / 2, margin + 40)
       ctx.restore()
       // 副标题胶囊
       const subText = this.isTakeaway ? `${dateStr}   共 ${totalCount} 家` : `${dateStr}   共 ${totalCount} 份`
@@ -432,6 +436,8 @@ export default {
       // 内容签名（菜品+份数+祝福语），用于去重，同一份菜单不重复记录
       const sign = this.cartList.map(i => `${i.id}x${i.num}`).join('|') + '#' + this.customMessage.trim()
       this.$store.commit('saveHistoryImg', { img: base64, sign })
+      // 生成清单 +1 经验
+      this.$store.commit('addExp', 1)
     },
     async shareOrSaveImage() {
       try {
@@ -440,6 +446,8 @@ export default {
         // 优先系统分享（移动端可直接分享到微信/保存相册）
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: this.shareTitle })
+          // 分享成功 +2 经验
+          this.$store.commit('addExp', 2)
           return
         }
         // 微信等内置浏览器不支持下载，引导长按图片
@@ -461,6 +469,8 @@ export default {
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
         Toast.success('图片已开始下载')
+        // 下载/保存成功 +2 经验
+        this.$store.commit('addExp', 2)
       } catch (e) {
         if (e && e.name === 'AbortError') return // 用户取消分享
         Toast({

@@ -14,6 +14,9 @@ export default {
   name: 'App',
   components: {
     TabBar
+  },
+  mounted() {
+    this.$store.commit('checkIn')
   }
 }
 </script>
