@@ -295,152 +295,220 @@ export const dishes = [
   }
 ]
 
-// ===== 杭州外卖菜单 =====
-export const takeawayCategoryList = ['全部', '杭帮面饭', '小吃快餐', '烧烤炸物', '轻食沙拉', '奶茶甜品']
+// ===== 杭州外卖店铺数据 =====
+// 字段说明：
+// name=店名, category=店铺分类, intro=一句话简介, signature=招牌推荐,
+// perPerson=人均(元), deliveryTime=配送时长, rating=评分,
+// thumbImg/detailImg=图片, cookStep=备注/推荐理由（按\n分隔展示）
+export const takeawayCategoryList = ['全部', '中式快餐', '面食小吃', '烧烤夜宵', '奶茶甜品', '咖啡轻食']
 
 export const takeawayDishes = [
   {
-    id: 1001,
-    name: '片儿川',
-    category: '杭帮面饭',
-    thumbImg: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=600&h=400&fit=crop',
-    intro: '杭州最具代表性的汤面，雪菜、笋片、瘦肉片，汤鲜面滑。',
-    cookStep: '1. 面条焯水备用\n2. 笋片、雪菜、瘦肉片炒香\n3. 加高汤烧开，放入面条\n4. 调味后撒葱花出锅'
-  },
-  {
-    id: 1002,
-    name: '葱包桧儿',
-    category: '小吃快餐',
-    thumbImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600&h=400&fit=crop',
-    intro: '杭州传统早点，春饼卷油条加葱，压烤至香脆。',
-    cookStep: '1. 春饼铺平，放油条和葱段\n2. 卷紧后入平底锅压烤\n3. 两面金黄刷甜面酱即可'
-  },
-  {
-    id: 1003,
-    name: '西湖醋鱼',
-    category: '杭帮面饭',
-    thumbImg: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=600&h=400&fit=crop',
-    intro: '杭帮菜经典，鱼肉鲜嫩，酸甜适口，色泽红亮。',
-    cookStep: '1. 草鱼饿养去腥，划刀焯水\n2. 调糖醋汁（酱油、糖、醋、绍酒）\n3. 鱼装盘，淋芡汁，撒姜末'
-  },
-  {
-    id: 1004,
-    name: '东坡肉',
-    category: '杭帮面饭',
+    id: 2001,
+    name: '老娘舅',
+    category: '中式快餐',
     thumbImg: 'https://images.unsplash.com/photo-1606657408945-1e424688035c?w=200&h=200&fit=crop',
     detailImg: 'https://images.unsplash.com/photo-1606657408945-1e424688035c?w=600&h=400&fit=crop',
-    intro: '肥而不腻、酥而不碎，杭州名菜中的代表作。',
-    cookStep: '1. 五花肉方块焯水\n2. 砂锅底部铺葱姜，肉皮朝下码放\n3. 加黄酒、酱油、冰糖小火焖2小时\n4. 收汁装盘'
+    intro: '江浙中式快餐代表，米饭香、出餐快，工作餐首选。',
+    signature: '招牌：香稻好米饭、番茄炒蛋、银鱼蒸蛋',
+    perPerson: 28,
+    deliveryTime: '30分钟',
+    rating: 4.6,
+    cookStep: '1. 推荐点「番茄炒蛋饭+蒸蛋」套餐\n2. 米饭口感好，配送速度稳定\n3. 适合工作日中午快速解决一餐'
   },
   {
-    id: 1005,
-    name: '小笼包',
-    category: '小吃快餐',
+    id: 2002,
+    name: '知味观',
+    category: '面食小吃',
+    thumbImg: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=600&h=400&fit=crop',
+    intro: '杭州百年老字号，小笼、馄饨、片儿川都是经典。',
+    signature: '招牌：鲜肉小笼、虾肉馄饨、片儿川',
+    perPerson: 35,
+    deliveryTime: '40分钟',
+    rating: 4.7,
+    cookStep: '1. 小笼包汤汁足，建议趁热吃\n2. 片儿川是杭州特色汤面\n3. 适合想吃杭帮小吃的日子'
+  },
+  {
+    id: 2003,
+    name: '新丰小吃',
+    category: '面食小吃',
     thumbImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&h=200&fit=crop',
     detailImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600&h=400&fit=crop',
-    intro: '皮薄馅大、汤汁鲜美，杭州人早餐和夜宵都爱点。',
-    cookStep: '1. 肉馅加皮冻调味\n2. 擀薄皮包入肉馅捏褶\n3. 蒸笼大火蒸8-10分钟\n4. 配姜丝醋蘸食'
+    intro: '杭州本地小吃连锁，虾肉小笼和牛肉粉丝是招牌。',
+    signature: '招牌：虾肉小笼、牛肉粉丝、喉口馒头',
+    perPerson: 22,
+    deliveryTime: '35分钟',
+    rating: 4.5,
+    cookStep: '1. 虾肉小笼性价比极高\n2. 牛肉粉丝汤鲜味美\n3. 适合早餐/午餐简餐'
   },
   {
-    id: 1006,
-    name: '炸鸡排',
-    category: '烧烤炸物',
-    thumbImg: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&h=400&fit=crop',
-    intro: '外皮酥脆、肉质多汁，外卖界永远的C位。',
-    cookStep: '1. 鸡胸肉拍松腌制\n2. 裹淀粉、蛋液、面包糠\n3. 中油温炸至金黄\n4. 切块撒椒盐或甘梅粉'
+    id: 2004,
+    name: '外婆家',
+    category: '中式快餐',
+    thumbImg: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=600&h=400&fit=crop',
+    intro: '杭帮菜国民品牌，口味稳定，适合两人以上点。',
+    signature: '招牌：茶香鸡、麻婆豆腐、西湖醋鱼',
+    perPerson: 45,
+    deliveryTime: '45分钟',
+    rating: 4.6,
+    cookStep: '1. 茶香鸡分量足，适合分享\n2. 麻婆豆腐便宜下饭\n3. 建议2-3人一起点更划算'
   },
   {
-    id: 1007,
-    name: '烧烤羊肉串',
-    category: '烧烤炸物',
-    thumbImg: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&h=400&fit=crop',
-    intro: '夜宵灵魂，孜然辣椒一撒，外卖也能吃出烟火气。',
-    cookStep: '1. 羊肉切块腌制\n2. 穿串烤至出油\n3. 撒孜然、辣椒面、盐\n4. 趁热吃最香'
-  },
-  {
-    id: 1008,
-    name: '虾仁拌川',
-    category: '杭帮面饭',
-    thumbImg: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=600&h=400&fit=crop',
-    intro: '杭州特色拌面，虾仁Q弹，酱香浓郁，锅气十足。',
-    cookStep: '1. 面条煮至八分熟\n2. 虾仁、豆芽、香干过油\n3. 下面条加酱油、糖大火翻拌\n4. 装盘撒葱花'
-  },
-  {
-    id: 1009,
-    name: '生煎包',
-    category: '小吃快餐',
-    thumbImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600&h=400&fit=crop',
-    intro: '底部焦脆，顶部暄软，咬一口汤汁四溢。',
-    cookStep: '1. 包好的包子放入平底锅\n2. 加水盖盖焖煎至水分收干\n3. 淋油煎出脆底\n4. 撒葱花、芝麻出锅'
-  },
-  {
-    id: 1010,
-    name: '轻食鸡胸沙拉',
-    category: '轻食沙拉',
-    thumbImg: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop',
-    intro: '低卡高蛋白，减脂期的健康外卖首选。',
-    cookStep: '1. 鸡胸肉煎熟切片\n2. 生菜、黄瓜、小番茄洗净\n3. 搭配水煮蛋、玉米粒\n4. 淋油醋汁拌匀'
-  },
-  {
-    id: 1011,
-    name: '珍珠奶茶',
+    id: 2005,
+    name: '一点点',
     category: '奶茶甜品',
     thumbImg: 'https://images.unsplash.com/photo-1558855410-3112e253d704?w=200&h=200&fit=crop',
     detailImg: 'https://images.unsplash.com/photo-1558855410-3112e253d704?w=600&h=400&fit=crop',
-    intro: '奶茶配外卖，快乐加倍，杭州人的下午茶标配。',
-    cookStep: '1. 红茶煮出茶汤\n2. 加奶精/牛奶和糖调制\n3. 杯底加煮好的珍珠\n4. 倒入奶茶摇匀'
+    intro: '台式奶茶连锁，波霸奶茶是很多人的下午茶标配。',
+    signature: '招牌：波霸奶茶、四季奶青、乌龙拿铁',
+    perPerson: 15,
+    deliveryTime: '25分钟',
+    rating: 4.7,
+    cookStep: '1. 三分糖+少冰是经典搭配\n2. 波霸软糯有嚼劲\n3. 适合搭配正餐或下午茶'
   },
   {
-    id: 1012,
-    name: '抹茶千层',
+    id: 2006,
+    name: '古茗',
     category: '奶茶甜品',
     thumbImg: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200&h=200&fit=crop',
     detailImg: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=400&fit=crop',
-    intro: '细腻抹茶奶油与薄饼层层叠加，饭后甜点首选。',
-    cookStep: '1. 抹茶班戟皮一张张煎好\n2. 奶油加糖打发\n3. 一层皮一层奶油堆叠\n4. 冷藏定型后切块'
+    intro: '浙江本土奶茶品牌，果茶和奶茶选择都很多。',
+    signature: '招牌：杨枝甘露、超A芝士葡萄、布雷脆脆奶芙',
+    perPerson: 16,
+    deliveryTime: '25分钟',
+    rating: 4.6,
+    cookStep: '1. 杨枝甘露料足清爽\n2. 芝士果茶层次丰富\n3. 适合夏天解暑'
   },
   {
-    id: 1013,
-    name: '卤肉饭',
-    category: '杭帮面饭',
-    thumbImg: 'https://images.unsplash.com/photo-1606657408945-1e424688035c?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1606657408945-1e424688035c?w=600&h=400&fit=crop',
-    intro: '肉燥香浓，卤汁拌饭一绝，外卖点单常客。',
-    cookStep: '1. 五花肉切丁煸出油脂\n2. 加红葱头、香菇、酱油卤制\n3. 小火炖至软烂\n4. 浇在米饭上配卤蛋'
+    id: 2007,
+    name: '永和大王',
+    category: '中式快餐',
+    thumbImg: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=600&h=400&fit=crop',
+    intro: '豆浆油条起家，台式卤肉饭和三杯鸡饭很受欢迎。',
+    signature: '招牌：卤肉饭、三杯鸡饭、现磨豆浆',
+    perPerson: 26,
+    deliveryTime: '30分钟',
+    rating: 4.4,
+    cookStep: '1. 卤肉饭酱汁浓郁下饭\n2. 豆浆配油条是早餐组合\n3. 出餐稳定，适合一人食'
   },
   {
-    id: 1014,
-    name: '炸酱面',
-    category: '杭帮面饭',
+    id: 2008,
+    name: '兰州拉面',
+    category: '面食小吃',
     thumbImg: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=200&h=200&fit=crop',
     detailImg: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=600&h=400&fit=crop',
-    intro: '酱香浓郁，面条劲道，一碗下去很满足。',
-    cookStep: '1. 肉末加甜面酱、黄豆酱炒成炸酱\n2. 黄瓜、胡萝卜切丝\n3. 面条煮熟过凉水\n4. 拌入炸酱和蔬菜丝'
+    intro: '现拉面条劲道，牛肉汤清香，杭州外卖常见选择。',
+    signature: '招牌：牛肉拉面、凉拌牛肉、大盘鸡',
+    perPerson: 24,
+    deliveryTime: '35分钟',
+    rating: 4.5,
+    cookStep: '1. 拉面要选毛细或二细\n2. 汤面分开装口感更好\n3. 冬天吃一碗很暖胃'
   },
   {
-    id: 1015,
-    name: '麻辣香锅',
-    category: '烧烤炸物',
-    thumbImg: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=200&h=200&fit=crop',
-    detailImg: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=600&h=400&fit=crop',
-    intro: '荤素一锅炒，麻辣鲜香，外卖聚餐热门选择。',
-    cookStep: '1. 各类食材焯水或油炸\n2. 锅中爆香花椒、干辣椒、豆瓣酱\n3. 倒入食材大火翻匀\n4. 撒芝麻、香菜出锅'
+    id: 2009,
+    name: '正新鸡排',
+    category: '烧烤夜宵',
+    thumbImg: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&h=400&fit=crop',
+    intro: '鸡排界老品牌，分量足、价格实在，夜宵党最爱。',
+    signature: '招牌：大鸡排、烤串、烤肠',
+    perPerson: 20,
+    deliveryTime: '30分钟',
+    rating: 4.3,
+    cookStep: '1. 鸡排建议点甘梅味\n2. 烤串性价比不错\n3. 适合下午加餐或夜宵'
   },
   {
-    id: 1016,
-    name: '牛肉汉堡',
-    category: '小吃快餐',
+    id: 2010,
+    name: '木屋烧烤',
+    category: '烧烤夜宵',
+    thumbImg: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&h=400&fit=crop',
+    intro: '连锁烧烤品牌，包装好、味道稳定，适合深夜下单。',
+    signature: '招牌：烤羊肉串、烤茄子、烤生蚝',
+    perPerson: 55,
+    deliveryTime: '50分钟',
+    rating: 4.5,
+    cookStep: '1. 羊肉串肥瘦相间\n2. 烤茄子蒜香浓郁\n3. 建议多人聚餐时点'
+  },
+  {
+    id: 2011,
+    name: '瑞幸咖啡',
+    category: '咖啡轻食',
+    thumbImg: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop',
+    intro: '上班族续命水，生椰拿铁火遍全国，轻食也划算。',
+    signature: '招牌：生椰拿铁、美式、轻食套餐',
+    perPerson: 20,
+    deliveryTime: '25分钟',
+    rating: 4.6,
+    cookStep: '1. 生椰拿铁默认甜度即可\n2. 贝果/三明治适合早餐\n3. 配送快，适合提神下午茶'
+  },
+  {
+    id: 2012,
+    name: '汉堡王',
+    category: '中式快餐',
     thumbImg: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop',
     detailImg: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop',
-    intro: '厚实牛肉饼配芝士，外卖快餐中的满足感担当。',
-    cookStep: '1. 牛肉饼煎熟，芝士片融化\n2. 汉堡胚切开烘烤\n3. 放生菜、番茄、酸黄瓜\n4. 夹入肉饼，挤酱'
+    intro: '火烤肉饼是特色，汉堡分量比某记某劳更扎实。',
+    signature: '招牌：皇堡、薯条、洋葱圈',
+    perPerson: 32,
+    deliveryTime: '30分钟',
+    rating: 4.5,
+    cookStep: '1. 皇堡可以自定义加料\n2. 洋葱圈比薯条更特色\n3. 适合想大口吃肉的日子'
+  },
+  {
+    id: 2013,
+    name: '张亮麻辣烫',
+    category: '面食小吃',
+    thumbImg: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=600&h=400&fit=crop',
+    intro: '汤底选择多，食材丰富，一人食也能吃出满足感。',
+    signature: '招牌：骨汤麻辣烫、麻辣拌、宽粉',
+    perPerson: 30,
+    deliveryTime: '35分钟',
+    rating: 4.4,
+    cookStep: '1. 骨汤适合不吃辣的人\n2. 麻辣拌更入味\n3. 建议加宽粉和丸子'
+  },
+  {
+    id: 2014,
+    name: '食其家',
+    category: '中式快餐',
+    thumbImg: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=600&h=400&fit=crop',
+    intro: '日式牛丼连锁，牛肉饭简单管饱，出餐很快。',
+    signature: '招牌：牛丼饭、咖喱饭、温泉蛋',
+    perPerson: 28,
+    deliveryTime: '25分钟',
+    rating: 4.5,
+    cookStep: '1. 牛丼饭加温泉蛋更嫩滑\n2. 咖喱饭分量足\n3. 适合赶时间的午餐'
+  },
+  {
+    id: 2015,
+    name: '蜜雪冰城',
+    category: '奶茶甜品',
+    thumbImg: 'https://images.unsplash.com/photo-1558855410-3112e253d704?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1558855410-3112e253d704?w=600&h=400&fit=crop',
+    intro: '价格杀手，柠檬水、冰淇淋便宜大碗，办公室拼单常客。',
+    signature: '招牌：冰鲜柠檬水、摩天脆脆、珍珠奶茶',
+    perPerson: 10,
+    deliveryTime: '20分钟',
+    rating: 4.4,
+    cookStep: '1. 柠檬水少糖更清爽\n2. 摩天脆脆便宜好吃\n3. 适合办公室多人拼单'
+  },
+  {
+    id: 2016,
+    name: '星巴克',
+    category: '咖啡轻食',
+    thumbImg: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&h=200&fit=crop',
+    detailImg: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=400&fit=crop',
+    intro: '咖啡+轻食的老牌选择，环境好、配送稳定。',
+    signature: '招牌：拿铁、星冰乐、三明治',
+    perPerson: 40,
+    deliveryTime: '30分钟',
+    rating: 4.6,
+    cookStep: '1. 拿铁选燕麦奶口感更好\n2. 星冰乐偏甜，可选半糖\n3. 三明治适合搭配早餐'
   }
 ]

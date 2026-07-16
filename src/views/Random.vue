@@ -2,12 +2,12 @@
   <div class="random-page">
     <!-- 顶部标题 -->
     <div class="page-header">
-      <div class="header-title">🎲 随机选菜</div>
-      <div class="header-desc">让选择困难症不再困难</div>
+      <div class="header-title">{{ isTakeaway ? '🛵 随机选店' : '🎲 随机选菜' }}</div>
+      <div class="header-desc">{{ isTakeaway ? '中午点哪家外卖，交给天意' : '让选择困难症不再困难' }}</div>
     </div>
 
-    <!-- 快捷模式 -->
-    <div class="mode-section">
+    <!-- 快捷模式（仅午餐模式） -->
+    <div class="mode-section" v-if="!isTakeaway">
       <div class="section-title">快捷模式</div>
       <div class="mode-cards">
         <div
@@ -40,9 +40,9 @@
       </div>
     </div>
 
-    <!-- 自定义配置区 -->
+    <!-- 自定义配置区（仅午餐模式） -->
     <transition name="fade">
-      <div class="custom-section" v-if="currentMode === 'custom'">
+      <div class="custom-section" v-if="currentMode === 'custom' && !isTakeaway">
         <div class="section-title">自定义搭配</div>
         <div class="custom-row" v-for="(item, idx) in customConfig" :key="idx">
           <div class="custom-label">{{ item.label }}</div>
@@ -58,15 +58,15 @@
     <!-- 随机按钮 -->
     <div class="roll-section">
       <div class="roll-btn" :class="{ rolling: isRolling }" @click="rollDishes">
-        <span v-if="!isRolling">🎰 开始随机</span>
-        <span v-else>🎲 选菜中...</span>
+        <span v-if="!isRolling">{{ isTakeaway ? '🎰 随机选一家店' : '🎰 开始随机' }}</span>
+        <span v-else>{{ isTakeaway ? '🎲 选店中...' : '🎲 选菜中...' }}</span>
       </div>
     </div>
 
     <!-- 结果展示 -->
     <transition name="slide-up">
       <div class="result-section" v-if="resultList.length">
-        <div class="section-title">今日菜单</div>
+        <div class="section-title">{{ isTakeaway ? '今天点这家' : '今日菜单' }}</div>
         <div class="result-list">
           <div
             class="result-item"
@@ -78,6 +78,11 @@
             <div class="result-info">
               <div class="result-name">{{ dish.name }}</div>
               <van-tag size="medium" :color="tagColor(dish.category)">{{ dish.category }}</van-tag>
+              <div v-if="isTakeaway" class="result-shop-meta">
+                <span>¥{{ dish.perPerson }}/人</span>
+                <span>{{ dish.deliveryTime }}</span>
+                <span>⭐ {{ dish.rating }}</span>
+              </div>
             </div>
             <div class="result-add" @click.stop="addToCart(dish)">
               <span>+</span>
@@ -87,10 +92,10 @@
         <!-- 操作按钮 -->
         <div class="result-actions">
           <div class="action-btn primary" @click="addAllToCart">
-            🛒 全部加入购物车
+            {{ isTakeaway ? '📝 加入清单' : '🛒 全部加入购物车' }}
           </div>
           <div class="action-btn" @click="rollDishes">
-            🔄 换一批
+            {{ isTakeaway ? '🔄 换一家' : '🔄 换一批' }}
           </div>
         </div>
       </div>
@@ -127,11 +132,11 @@ export default {
     customConfig() {
       if (this.isTakeaway) {
         return [
-          { label: '杭帮面饭', category: '杭帮面饭', num: 1 },
-          { label: '小吃快餐', category: '小吃快餐', num: 1 },
-          { label: '烧烤炸物', category: '烧烤炸物', num: 0 },
-          { label: '轻食沙拉', category: '轻食沙拉', num: 0 },
-          { label: '奶茶甜品', category: '奶茶甜品', num: 0 }
+          { label: '中式快餐', category: '中式快餐', num: 1 },
+          { label: '面食小吃', category: '面食小吃', num: 0 },
+          { label: '烧烤夜宵', category: '烧烤夜宵', num: 0 },
+          { label: '奶茶甜品', category: '奶茶甜品', num: 0 },
+          { label: '咖啡轻食', category: '咖啡轻食', num: 0 }
         ]
       }
       return [
@@ -160,11 +165,11 @@ export default {
     tagColor(category) {
       const map = this.isTakeaway
         ? {
-            '杭帮面饭': '#ff6034',
-            '小吃快餐': '#ff9800',
-            '烧烤炸物': '#e91e63',
-            '轻食沙拉': '#4caf50',
-            '奶茶甜品': '#9c27b0'
+            '中式快餐': '#ff6034',
+            '面食小吃': '#ff9800',
+            '烧烤夜宵': '#e91e63',
+            '奶茶甜品': '#9c27b0',
+            '咖啡轻食': '#4caf50'
           }
         : {
             '中餐炒菜': '#ff6034',
@@ -186,44 +191,28 @@ export default {
       setTimeout(() => {
         let result = []
 
-        if (this.currentMode === 'fourOneSoup') {
+        if (this.isTakeaway) {
+          // 外卖模式：直接随机选一家店
+          const pool = this.allDishes.length > 0 ? this.allDishes : takeawayDishes
+          result = this.getRandomItems(pool, 1)
+        } else if (this.currentMode === 'fourOneSoup') {
           // 四菜一汤：3荤 + 1素 + 1汤（午餐模式）
-          if (this.isTakeaway) {
-            const main = this.allDishes.filter(d => d.category === '杭帮面饭')
-            const snack = this.allDishes.filter(d => d.category === '小吃快餐')
-            const drink = this.allDishes.filter(d => d.category === '奶茶甜品')
-            result = [
-              ...this.getRandomItems(main, 2),
-              ...this.getRandomItems(snack, 2),
-              ...this.getRandomItems(drink, 1)
-            ]
-          } else {
-            const meat = this.allDishes.filter(d => d.category === '中餐炒菜')
-            const veg = this.allDishes.filter(d => d.category === '蔬菜')
-            const soup = this.allDishes.filter(d => d.category === '汤')
-            result = [
-              ...this.getRandomItems(meat, 3),
-              ...this.getRandomItems(veg, 1),
-              ...this.getRandomItems(soup, 1)
-            ]
-          }
+          const meat = this.allDishes.filter(d => d.category === '中餐炒菜')
+          const veg = this.allDishes.filter(d => d.category === '蔬菜')
+          const soup = this.allDishes.filter(d => d.category === '汤')
+          result = [
+            ...this.getRandomItems(meat, 3),
+            ...this.getRandomItems(veg, 1),
+            ...this.getRandomItems(soup, 1)
+          ]
         } else if (this.currentMode === 'oneMeatTwoVeg') {
-          // 一荤两素 / 外卖均衡搭配
-          if (this.isTakeaway) {
-            const main = this.allDishes.filter(d => d.category === '杭帮面饭')
-            const snack = this.allDishes.filter(d => d.category === '小吃快餐')
-            result = [
-              ...this.getRandomItems(main, 2),
-              ...this.getRandomItems(snack, 1)
-            ]
-          } else {
-            const meat = this.allDishes.filter(d => d.category === '中餐炒菜')
-            const veg = this.allDishes.filter(d => d.category === '蔬菜')
-            result = [
-              ...this.getRandomItems(meat, 1),
-              ...this.getRandomItems(veg, 2)
-            ]
-          }
+          // 一荤两素
+          const meat = this.allDishes.filter(d => d.category === '中餐炒菜')
+          const veg = this.allDishes.filter(d => d.category === '蔬菜')
+          result = [
+            ...this.getRandomItems(meat, 1),
+            ...this.getRandomItems(veg, 2)
+          ]
         } else {
           // 自定义模式
           this.customConfig.forEach(cfg => {
@@ -246,13 +235,15 @@ export default {
     },
     addToCart(dish) {
       this.$store.commit('addCart', { ...dish, num: 1 })
-      Toast.success({ message: `${dish.name} 已加入`, duration: 1000 })
+      const msg = this.isTakeaway ? `${dish.name} 已加入清单` : `${dish.name} 已加入`
+      Toast.success({ message: msg, duration: 1000 })
     },
     addAllToCart() {
       this.resultList.forEach(dish => {
         this.$store.commit('addCart', { ...dish, num: 1 })
       })
-      Toast.success({ message: `已全部加入购物车`, duration: 1200 })
+      const msg = this.isTakeaway ? '已加入外卖清单' : '已全部加入购物车'
+      Toast.success({ message: msg, duration: 1200 })
     }
   }
 }
@@ -455,6 +446,14 @@ export default {
   font-weight: 500;
   color: #333;
   margin-bottom: 4px;
+}
+.result-shop-meta {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 .result-add {
   width: 30px;

@@ -49,7 +49,7 @@
         :title="cat"
       />
     </van-tabs>
-    <!-- 菜品列表 -->
+    <!-- 列表 -->
     <div class="dish-list" v-if="filteredDishes.length">
       <div
         class="dish-card"
@@ -64,8 +64,15 @@
           <div class="dish-name">{{ dish.name }}</div>
           <div class="dish-tag">
             <van-tag type="primary" color="#ff6034" size="medium">{{ dish.category }}</van-tag>
+            <template v-if="isTakeaway">
+              <van-tag color="#ffb800" text-color="#fff" size="medium" style="margin-left: 6px">⭐ {{ dish.rating }}</van-tag>
+            </template>
           </div>
           <div class="dish-intro">{{ dish.intro }}</div>
+          <div v-if="isTakeaway" class="shop-meta">
+            <span>人均 ¥{{ dish.perPerson }}</span>
+            <span>{{ dish.deliveryTime }}</span>
+          </div>
           <div class="add-btn" @click.stop="quickAdd(dish)">
             <span class="add-btn-icon">+</span>
           </div>
@@ -76,7 +83,7 @@
     <EmptyState
       v-else
       icon="search"
-      :text="keyword ? '暂无相关菜品，换个关键词试试' : '当前分类暂无菜品'"
+      :text="keyword ? (isTakeaway ? '暂无相关店铺，换个关键词试试' : '暂无相关菜品，换个关键词试试') : (isTakeaway ? '当前分类暂无店铺' : '当前分类暂无菜品')"
     />
 
     <!-- 购物车预览浮层 -->
@@ -95,12 +102,12 @@
             <span v-if="cartList.length > 4" class="cart-preview-more">+{{ cartList.length - 4 }}</span>
           </div>
           <div class="cart-preview-info">
-            <span class="cart-preview-count">已选 <b>{{ cartTotalCount }}</b> 份</span>
+            <span class="cart-preview-count">已选 <b>{{ cartTotalCount }}</b> {{ isTakeaway ? '家' : '份' }}</span>
             <span class="cart-preview-names">{{ cartNames }}</span>
           </div>
         </div>
         <div class="cart-preview-btn">
-          去下单
+          {{ isTakeaway ? '去生成清单' : '去下单' }}
         </div>
       </div>
     </transition>
@@ -375,6 +382,13 @@ export default {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.5;
+}
+.shop-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
 }
 .add-btn {
   align-self: flex-end;

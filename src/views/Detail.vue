@@ -10,11 +10,26 @@
       <h1 class="dish-name">{{ dish.name }}</h1>
       <van-tag type="primary" color="#ff6034" size="large">{{ dish.category }}</van-tag>
       <p class="dish-intro">{{ dish.intro }}</p>
+      <div v-if="isTakeaway" class="shop-info-bar">
+        <div class="shop-info-item">
+          <span class="shop-info-value">¥{{ dish.perPerson }}</span>
+          <span class="shop-info-label">人均</span>
+        </div>
+        <div class="shop-info-item">
+          <span class="shop-info-value">{{ dish.deliveryTime }}</span>
+          <span class="shop-info-label">配送</span>
+        </div>
+        <div class="shop-info-item">
+          <span class="shop-info-value">{{ dish.rating }}</span>
+          <span class="shop-info-label">评分</span>
+        </div>
+      </div>
+      <div v-if="isTakeaway && dish.signature" class="signature">{{ dish.signature }}</div>
     </div>
-    <!-- 做菜步骤 -->
+    <!-- 详情/步骤 -->
     <div class="step-section">
       <h3 class="section-title">
-        <van-icon name="label-o" /> 做菜步骤
+        <van-icon :name="isTakeaway ? 'shop-o' : 'label-o'" /> {{ isTakeaway ? '推荐理由' : '做菜步骤' }}
       </h3>
       <div class="steps">
         <p v-for="(step, idx) in steps" :key="idx" class="step-item">{{ step }}</p>
@@ -32,7 +47,7 @@
       >
         返回
       </van-button>
-      <div class="stepper-wrap">
+      <div v-if="!isTakeaway" class="stepper-wrap">
         <van-stepper v-model="num" min="1" max="99" />
       </div>
       <van-button
@@ -41,7 +56,7 @@
         class="add-cart-btn"
         @click="addToCart"
       >
-        加入购物车
+        {{ isTakeaway ? '加入清单' : '加入购物车' }}
       </van-button>
     </div>
   </div>
@@ -66,6 +81,9 @@ export default {
     }
   },
   computed: {
+    isTakeaway() {
+      return this.$store.state.appMode === 'takeaway'
+    },
     steps() {
       return this.dish.cookStep ? this.dish.cookStep.split('\n') : []
     }
@@ -80,9 +98,10 @@ export default {
       e.target.src = '/img/default-food.svg'
     },
     addToCart() {
-      this.$store.commit('addCart', { ...this.dish, num: this.num })
-      Toast.success({ message: `已加入 ${this.num} 份`, duration: 1200 })
-      this.num = 1
+      const num = this.isTakeaway ? 1 : this.num
+      this.$store.commit('addCart', { ...this.dish, num })
+      Toast.success({ message: this.isTakeaway ? '已加入清单' : `已加入 ${num} 份`, duration: 1200 })
+      if (!this.isTakeaway) this.num = 1
     }
   }
 }
@@ -126,6 +145,39 @@ export default {
   color: #666;
   line-height: 1.6;
   margin: 12px 0 0;
+}
+.shop-info-bar {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fff8f0, #fff);
+  border-radius: 10px;
+  border: 1px solid #ffe8d6;
+}
+.shop-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.shop-info-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff6034;
+}
+.shop-info-label {
+  font-size: 12px;
+  color: #999;
+}
+.signature {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #389e0d;
+  line-height: 1.5;
 }
 .step-section {
   padding: 20px 16px;

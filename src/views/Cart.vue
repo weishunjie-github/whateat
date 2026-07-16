@@ -9,11 +9,13 @@
             <div class="item-name">{{ item.name }}</div>
             <div class="item-actions">
               <van-stepper
+                v-if="!isTakeaway"
                 :value="item.num"
                 min="1"
                 max="99"
                 @change="val => onNumChange(item.id, val)"
               />
+              <span v-else class="shop-qty">1 家</span>
               <van-button
                 size="mini"
                 plain
@@ -93,7 +95,7 @@
         </div>
         <div class="preview-actions">
           <van-button type="danger" round block icon="share-o" @click="shareOrSaveImage">
-            分享给会做饭的 TA
+            {{ isTakeaway ? '分享给不知道吃啥的 TA' : '分享给会做饭的 TA' }}
           </van-button>
           <van-button plain round block style="margin-top: 10px" @click="showPreview = false">
             关闭
@@ -154,7 +156,7 @@ export default {
       this.$store.commit('changeCartNum', { id, num: val })
     },
     delItem(id) {
-      Dialog.confirm({ title: '提示', message: '确定删除该菜品吗？' })
+      Dialog.confirm({ title: '提示', message: this.isTakeaway ? '确定从清单中删除该店铺吗？' : '确定删除该菜品吗？' })
         .then(() => {
           this.$store.commit('delCartItem', id)
           Toast.success('已删除')
@@ -169,7 +171,7 @@ export default {
       this.allSelected = !this.allSelected
     },
     confirmClear() {
-      Dialog.confirm({ title: '提示', message: '确定清空全部购物车吗？' })
+      Dialog.confirm({ title: '提示', message: this.isTakeaway ? '确定清空全部外卖清单吗？' : '确定清空全部购物车吗？' })
         .then(() => {
           this.$store.commit('clearCart')
           Toast.success('已清空')
@@ -189,7 +191,7 @@ export default {
     },
     async generateList() {
       if (!this.cartList.length) {
-        Toast('购物车为空，请先添加菜品')
+        Toast(this.isTakeaway ? '清单为空，先去选家店吧' : '购物车为空，请先添加菜品')
         return
       }
       // 生成二维码（扫码跳转到站点）
@@ -282,7 +284,7 @@ export default {
       ctx.fillText(this.isTakeaway ? '🛵 杭州外卖清单' : '🍱 今日午餐菜单', W / 2, margin + 40)
       ctx.restore()
       // 副标题胶囊
-      const subText = `${dateStr}   共 ${totalCount} 份`
+      const subText = this.isTakeaway ? `${dateStr}   共 ${totalCount} 家` : `${dateStr}   共 ${totalCount} 份`
       ctx.font = '12px sans-serif'
       const subW = ctx.measureText(subText).width + 26
       const subX = W / 2 - subW / 2
@@ -348,11 +350,11 @@ export default {
       ctx.font = '14px sans-serif'
       ctx.fillStyle = '#999'
       ctx.textAlign = 'left'
-      ctx.fillText('合计', cardX + 20, totalY + 30)
+      ctx.fillText(this.isTakeaway ? '合计' : '合计', cardX + 20, totalY + 30)
       ctx.font = 'bold 15px sans-serif'
       ctx.fillStyle = '#ff6a3d'
       ctx.textAlign = 'right'
-      ctx.fillText(`${totalCount} 份`, cardX + cardW - 20, totalY + 30)
+      ctx.fillText(this.isTakeaway ? `${totalCount} 家` : `${totalCount} 份`, cardX + cardW - 20, totalY + 30)
 
       // 祝福语
       if (hasMsg) {
@@ -390,12 +392,12 @@ export default {
       ctx.font = '11px sans-serif'
       ctx.fillStyle = '#cba99b'
       ctx.textAlign = 'center'
-      ctx.fillText('♡  记得分享给会做饭的 TA 哦  ♡', W / 2, fTop + 26)
+      ctx.fillText(this.isTakeaway ? '♡  记得分享给不知道吃啥的 TA  ♡' : '♡  记得分享给会做饭的 TA 哦  ♡', W / 2, fTop + 26)
 
       // 二维码 + 说明（水平居中）
       const QR = 64
-      const line1 = '扫码发现更多'
-      const line2 = '家常菜谱等你做'
+      const line1 = this.isTakeaway ? '扫码一起点外卖' : '扫码发现更多'
+      const line2 = this.isTakeaway ? '再也不用纠结吃啥' : '家常菜谱等你做'
       ctx.font = 'bold 14px sans-serif'
       const t1w = ctx.measureText(line1).width
       ctx.font = '12px sans-serif'
@@ -513,6 +515,14 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+.shop-qty {
+  font-size: 13px;
+  color: #ff6034;
+  background: #fff4f0;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
 }
 .batch-bar {
   display: flex;
